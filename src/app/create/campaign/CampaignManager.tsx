@@ -28,6 +28,21 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  const presetPrompts = [
+    {
+      label: "New Campaign",
+      text: "Help me generate ideas and an outline for a new campaign, including potential story arcs and major plot points.",
+    },
+    {
+      label: "NPC Ideas",
+      text: "Generate interesting NPC ideas including their background, motivations, and potential role in the story.",
+    },
+    {
+      label: "Campaign Details",
+      text: "Help me add more detail and depth to my existing campaign, including side quests, locations, and world building elements.",
+    },
+  ];
+
   useEffect(() => {
     fetchContents();
   }, [campaignId]);
@@ -137,6 +152,13 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
     setIsEditing(false);
   };
 
+  const handlePresetPrompt = (promptText: string) => {
+    setNewContent({
+      ...newContent,
+      description: promptText,
+    });
+  };
+
   return (
     <div className="bg-[#2a2f3e] rounded-lg p-6">
       <h2 className="text-xl font-bold mb-6">Campaign Content</h2>
@@ -202,6 +224,26 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           <label className="block mb-2 text-sm font-medium">
             Content Description
           </label>
+          <div className="flex gap-2 mb-2">
+            {presetPrompts.map((prompt, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handlePresetPrompt(prompt.text)}
+                className="px-3 py-1 text-xs bg-[#1a1f2e] hover:bg-[#3a3f4e] rounded-full text-gray-300"
+              >
+                {prompt.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setNewContent({ ...newContent, description: "" })}
+              className="px-3 py-1 text-xs bg-red-900 hover:bg-red-800 rounded-full text-gray-300"
+              title="Clear description"
+            >
+              Clear
+            </button>
+          </div>
           <textarea
             className="w-full p-3 bg-[#1a1f2e] rounded-lg text-sm"
             value={newContent.description}
