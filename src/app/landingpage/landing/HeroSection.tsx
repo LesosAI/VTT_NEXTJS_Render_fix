@@ -25,7 +25,7 @@ export default function HeroSection() {
         <div className="nav-container w-container">
           <div className="nav-menu-wrapper">
             <a href="/" className="brand w-nav-brand">
-              <PhotoIcon className="nav-logo-icon" width="27" height="27" />
+             
             </a>
             <nav role="navigation" className="nav-menu w-nav-menu">
               <div className="tablet-menu">

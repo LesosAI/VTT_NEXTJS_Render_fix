@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ContentOneProps {
   // No props needed currently
@@ -96,19 +97,13 @@ const ContentOne: React.FC<ContentOneProps> = () => {
               </div>
             </div>
             <div className="video-wrapper">
-              <div className="column-video-background w-background-video w-background-video-atom">
-                <video
-                  poster={posterUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  data-object-fit="cover"
-                >
-                  <source src={videoMp4Url} type="video/mp4" />
-                  <source src={videoWebmUrl} type="video/webm" />
-                </video>
-              </div>
+              <Image
+                src="/Leonardo_4.avif"
+                alt="logo"
+                width={600}
+                height={400}
+                style={{ width: "100%", height: "auto" }}
+              />
             </div>
           </div>
         </div>

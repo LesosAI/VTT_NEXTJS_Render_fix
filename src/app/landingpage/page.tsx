@@ -11,7 +11,7 @@ export default function LandingPage() {
   return (
     <main className="flex flex-col min-h-screen">
       <div className="flex flex-col min-h-screen overflow-hidden">
-        <Image src="/images/538526_shinyarmor-v1-0.png" alt="logo" width={100} height={100} />
+        
         <HeroSection />
         <ContentOne />
         <QuoteSection />
