@@ -57,14 +57,19 @@ export default function Dashboard() {
 
         if (charactersData.success) {
           setImages(
-            charactersData.characters.map((char) => ({
+            charactersData.characters.map((char: Omit<Character, "type">) => ({
               ...char,
               type: "character",
             }))
           );
         }
         if (mapsData.success) {
-          setMaps(mapsData.maps.map((map) => ({ ...map, type: "map" })));
+          setMaps(
+            mapsData.maps.map((map: Omit<Map, "type">) => ({
+              ...map,
+              type: "map",
+            }))
+          );
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);

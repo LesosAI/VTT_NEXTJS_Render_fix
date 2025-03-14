@@ -37,9 +37,17 @@ export default function Plans() {
   const STRIPE_PRICE_IDS = {
     "Game Master Monthly": "price_1QijlK02khdf3R0AN2aXLQJP",
     "Game Master Yearly": "price_1QijlK02khdf3R0AMM6ohbah",
-  };
+  } as const;
 
-  const handlePlanAction = async (plan: any) => {
+  type StripePlanName = keyof typeof STRIPE_PRICE_IDS;
+
+  const handlePlanAction = async (plan: {
+    stripePlanName: StripePlanName | "Free";
+    price: string;
+    description: string;
+    name: string;
+    isCurrent: boolean;
+  }) => {
     if (
       !confirm(
         `Are you sure you want to ${
@@ -75,7 +83,10 @@ export default function Plans() {
         const checkoutPlan = {
           title: plan.stripePlanName,
           price: parseFloat(plan.price.replace("$", "")),
-          priceId: STRIPE_PRICE_IDS[plan.stripePlanName],
+          priceId:
+            plan.stripePlanName !== "Free"
+              ? STRIPE_PRICE_IDS[plan.stripePlanName]
+              : "",
           description: plan.description,
         };
 
@@ -90,7 +101,16 @@ export default function Plans() {
     }
   };
 
-  const plans = [
+  const plans: Array<{
+    name: string;
+    price: string;
+    period: string;
+    description: string;
+    features: string[];
+    buttonText: string;
+    isCurrent: boolean;
+    stripePlanName: StripePlanName | "Free";
+  }> = [
     {
       name: "Player",
       price: "$0",

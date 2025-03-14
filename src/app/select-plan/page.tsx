@@ -45,6 +45,7 @@ const PricingPlan: React.FC<
   disabled,
   isSelected,
   onSelect,
+  onGetAccess,
 }) => (
   <div
     onClick={onSelect}
@@ -216,6 +217,7 @@ export default function SelectPlanPage() {
                     price={isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                     isSelected={selectedPlan === plan.title}
                     onSelect={() => setSelectedPlan(plan.title)}
+                    onGetAccess={() => handleGetAccess(plan)}
                   />
                 ))}
               </div>
