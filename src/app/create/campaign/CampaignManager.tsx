@@ -6,15 +6,27 @@ interface CampaignManagerProps {
   campaignId: number;
 }
 
+interface Content {
+  id: number;
+  genre: string;
+  tone: string;
+  setting: string;
+  description: string;
+  content: string;
+  created_at: string;
+}
+
 export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const { username } = useLogin();
-  const [contents, setContents] = useState([]);
+  const [contents, setContents] = useState<Content[]>([]);
   const [newContent, setNewContent] = useState({
     description: "",
     genre: "fantasy",
     tone: "serious",
     setting: "medieval",
   });
+  const [editingContent, setEditingContent] = useState<Content | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchContents();
@@ -63,6 +75,66 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
     } catch (error) {
       console.error("Error generating content:", error);
     }
+  };
+
+  const handleDeleteContent = async (contentId: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${contentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
+
+      if (response.ok) {
+        fetchContents();
+      }
+    } catch (error) {
+      console.error("Error deleting content:", error);
+    }
+  };
+
+  const handleEditContent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingContent) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${editingContent.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            ...editingContent,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setIsEditing(false);
+        setEditingContent(null);
+        fetchContents();
+      }
+    } catch (error) {
+      console.error("Error updating content:", error);
+    }
+  };
+
+  const startEditing = (content: Content) => {
+    setEditingContent(content);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditingContent(null);
+    setIsEditing(false);
   };
 
   return (
@@ -153,28 +225,199 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
       <div className="space-y-4">
         {contents.map((content) => (
           <div key={content.id} className="bg-[#1a1f2e] p-4 rounded-lg">
-            <div className="flex gap-4 mb-3 text-xs text-gray-400">
-              {content.genre && (
-                <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                  Genre: {content.genre}
-                </span>
-              )}
-              {content.tone && (
-                <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                  Tone: {content.tone}
-                </span>
-              )}
-              {content.setting && (
-                <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                  Setting: {content.setting}
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-400 mb-2">{content.description}</p>
-            <p className="whitespace-pre-wrap">{content.content}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              Created: {new Date(content.created_at).toLocaleString()}
-            </p>
+            {isEditing && editingContent?.id === content.id ? (
+              <form onSubmit={handleEditContent} className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Genre
+                    </label>
+                    <select
+                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
+                      value={editingContent.genre}
+                      onChange={(e) =>
+                        setEditingContent({
+                          ...editingContent,
+                          genre: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="fantasy">Fantasy</option>
+                      <option value="sci-fi">Science Fiction</option>
+                      <option value="horror">Horror</option>
+                      <option value="modern">Modern</option>
+                      <option value="post-apocalyptic">Post-Apocalyptic</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Tone
+                    </label>
+                    <select
+                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
+                      value={editingContent.tone}
+                      onChange={(e) =>
+                        setEditingContent({
+                          ...editingContent,
+                          tone: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="serious">Serious</option>
+                      <option value="lighthearted">Lighthearted</option>
+                      <option value="dark">Dark</option>
+                      <option value="comedic">Comedic</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Setting
+                    </label>
+                    <select
+                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
+                      value={editingContent.setting}
+                      onChange={(e) =>
+                        setEditingContent({
+                          ...editingContent,
+                          setting: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="medieval">Medieval</option>
+                      <option value="urban">Urban</option>
+                      <option value="wilderness">Wilderness</option>
+                      <option value="space">Space</option>
+                      <option value="underwater">Underwater</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">
+                    Description
+                  </label>
+                  <textarea
+                    className="w-full p-3 bg-[#2a2f3e] rounded-lg text-sm"
+                    value={editingContent.description}
+                    onChange={(e) =>
+                      setEditingContent({
+                        ...editingContent,
+                        description: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">
+                    Content
+                  </label>
+                  <textarea
+                    className="w-full p-3 bg-[#2a2f3e] rounded-lg text-sm"
+                    value={editingContent.content}
+                    onChange={(e) =>
+                      setEditingContent({
+                        ...editingContent,
+                        content: e.target.value,
+                      })
+                    }
+                    rows={8}
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    className="py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex gap-4 text-xs text-gray-400">
+                    {content.genre && (
+                      <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                        Genre: {content.genre}
+                      </span>
+                    )}
+                    {content.tone && (
+                      <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                        Tone: {content.tone}
+                      </span>
+                    )}
+                    {content.setting && (
+                      <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                        Setting: {content.setting}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEditing(content)}
+                      className="p-1 text-gray-400 hover:text-white"
+                      title="Edit"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteContent(content.id)}
+                      className="p-1 text-gray-400 hover:text-red-400"
+                      title="Delete"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mb-2">
+                  {content.description}
+                </p>
+                <p className="whitespace-pre-wrap">{content.content}</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Created: {new Date(content.created_at).toLocaleString()}
+                </p>
+              </>
+            )}
           </div>
         ))}
       </div>
