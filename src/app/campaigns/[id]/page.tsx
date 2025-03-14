@@ -3,15 +3,28 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Topbar from "@/components/Topbar";
 
+interface Campaign {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface ContentItem {
+  type: string;
+  id: number;
+  name: string;
+  description: string;
+}
+
 export default function CampaignDetails() {
   const { id } = useParams();
-  const [campaign, setCampaign] = useState(null);
-  const [content, setContent] = useState([]);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [content, setContent] = useState<ContentItem[]>([]);
 
   useEffect(() => {
     // Mock data - replace with actual API calls
     setCampaign({
-      id,
+      id: String(id),
       name: "The Lost Kingdom",
       description: "A fantasy campaign...",
     });
