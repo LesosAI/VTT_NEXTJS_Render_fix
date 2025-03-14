@@ -1,0 +1,234 @@
+"use client";
+import { useState, useEffect } from "react";
+import Topbar from "@/components/Topbar";
+import { useLogin } from "@/context/LoginContext";
+import CampaignManager from "./CampaignManager";
+
+export default function CreateCampaign() {
+  const { username } = useLogin();
+  const [campaigns, setCampaigns] = useState([]);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
+
+  const [campaignData, setCampaignData] = useState({
+    name: "",
+  });
+
+  const [generatedText, setGeneratedText] = useState("");
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${username}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setCampaigns(data);
+        }
+      } catch (error) {
+        console.error("Error fetching campaigns:", error);
+      }
+    };
+
+    if (username) {
+      fetchCampaigns();
+    }
+  }, [username]);
+
+  // Add function to fetch content items
+
+  // Update handleSubmit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (selectedCampaign) {
+        // Update existing campaign
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${selectedCampaign}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: campaignData.name,
+              username: username,
+            }),
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to update campaign");
+        setGeneratedText("Campaign updated successfully!");
+      } else {
+        // Create new campaign
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: campaignData.name,
+              username: username,
+            }),
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to create campaign");
+        setGeneratedText("New campaign created successfully!");
+      }
+
+      // Refresh campaigns list
+      const campaignsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${username}`
+      );
+      if (campaignsResponse.ok) {
+        const campaignsData = await campaignsResponse.json();
+        setCampaigns(campaignsData);
+        setShowNewCampaignModal(false);
+        resetCampaignData();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setGeneratedText("Error occurred while processing your request.");
+    }
+  };
+
+  // Update resetCampaignData
+  const resetCampaignData = () => {
+    setCampaignData({
+      name: "",
+    });
+  };
+
+  // Update handleCampaignSelect
+  const handleCampaignSelect = (campaign) => {
+    setSelectedCampaign(campaign.id);
+    setCampaignData({
+      name: campaign.name,
+    });
+  };
+
+  // Update the modal open handler to reset selection
+  const handleNewCampaignModal = () => {
+    setSelectedCampaign(null); // Reset selected campaign
+    resetCampaignData(); // Reset form data
+    setShowNewCampaignModal(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#1a1f2e] text-white">
+      <Topbar />
+      <div className="p-8">
+        <div className="w-full max-w-[1800px] mx-auto">
+          <h1 className="text-2xl font-bold mb-8">Campaign Manager</h1>
+
+          <div className="grid grid-cols-[300px_1fr] gap-8">
+            {/* Left Sidebar - Campaigns List */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium">Your Campaigns</h2>
+                <button
+                  onClick={handleNewCampaignModal}
+                  className="p-2 bg-blue-600 hover:bg-blue-700 rounded-full"
+                  title="Create New Campaign"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {campaigns.map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className={`p-3 rounded-lg cursor-pointer ${
+                      selectedCampaign === campaign.id
+                        ? "bg-blue-600"
+                        : "bg-[#2a2f3e] hover:bg-[#3a3f4e]"
+                    }`}
+                    onClick={() => handleCampaignSelect(campaign)}
+                  >
+                    <h3 className="font-medium">{campaign.name}</h3>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Side - Campaign Description Form */}
+            <div>
+              {selectedCampaign ? (
+                <CampaignManager campaignId={selectedCampaign} />
+              ) : (
+                <div className="bg-[#2a2f3e] rounded-lg p-6 text-center">
+                  <p className="text-gray-400">
+                    Select a campaign or create a new one to get started
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* New Campaign Modal */}
+      {showNewCampaignModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-[#2a2f3e] rounded-lg p-6 w-96">
+            <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block mb-2 text-sm font-medium">
+                  Campaign Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                  value={campaignData.name}
+                  onChange={(e) =>
+                    setCampaignData({
+                      ...campaignData,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="Enter campaign name"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewCampaignModal(false)}
+                  className="py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
