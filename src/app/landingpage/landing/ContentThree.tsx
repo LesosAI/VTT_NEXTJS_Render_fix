@@ -1,4 +1,30 @@
+import Image from "next/image";
+
 const ContentThree = () => {
+  const campaigns = [
+    {
+      title: "Character Portrait Studio",
+      description:
+        "Explore our AI-powered portrait generator that creates stunning character artwork. Perfect for quickly visualizing your RPG characters with customizable features and styles.",
+      categories: ["Portraits", "Character Art"],
+      imageSrc: "/Leonardo_3.avif",
+    },
+    {
+      title: "Map Forge Workshop",
+      description:
+        "Create detailed battle maps and world maps with our intuitive AI tools. From fantasy dungeons to sci-fi space stations, bring your settings to life instantly.",
+      categories: ["Maps", "Worldbuilding"],
+      imageSrc: "/Leonardo_5.avif",
+    },
+    {
+      title: "Item & Prop Generator",
+      description:
+        "Design unique weapons, artifacts, and props for your campaigns. Our AI understands context and style, ensuring each item fits perfectly into your game world.",
+      categories: ["Items", "Props"],
+      imageSrc: "/Leonardo_12.avif",
+    },
+  ];
+
   return (
     <section className="section-dark large-bottom-space">
       <div className="w-layout-blockcontainer base-container w-container">
@@ -51,12 +77,24 @@ const ContentThree = () => {
                   </div>
                 </div>
                 <div className="news-image-holder w-inline-block">
-                  <img
-                    alt={campaign.imageAlt}
-                    loading="lazy"
-                    src={campaign.imageSrc}
-                    className="news-image"
-                  />
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "300px",
+                    }}
+                  >
+                    <Image
+                      src={campaign.imageSrc}
+                      alt={campaign.title}
+                      fill
+                      style={{
+                        objectFit: "cover",
+                        objectPosition: "top",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -66,32 +104,5 @@ const ContentThree = () => {
     </section>
   );
 };
-
-const campaigns = [
-  {
-    title: "Character Portrait Studio",
-    description:
-      "Explore our AI-powered portrait generator that creates stunning character artwork. Perfect for quickly visualizing your RPG characters with customizable features and styles.",
-    categories: ["Portraits", "Character Art"],
-    imageAlt: "AI character portrait example",
-    imageSrc: "./Home 1 - Art_files/64a6d51bb3affa85132265f1_news picture.jpg",
-  },
-  {
-    title: "Map Forge Workshop",
-    description:
-      "Create detailed battle maps and world maps with our intuitive AI tools. From fantasy dungeons to sci-fi space stations, bring your settings to life instantly.",
-    categories: ["Maps", "Worldbuilding"],
-    imageAlt: "AI-generated map example",
-    imageSrc: "./Home 1 - Art_files/64a6d5239347739128b3e674_post image.webp",
-  },
-  {
-    title: "Item & Prop Generator",
-    description:
-      "Design unique weapons, artifacts, and props for your campaigns. Our AI understands context and style, ensuring each item fits perfectly into your game world.",
-    categories: ["Items", "Props"],
-    imageAlt: "AI-generated item example",
-    imageSrc: "./Home 1 - Art_files/64a6d52a84183d8ce30a5d46_nature image.webp",
-  },
-];
 
 export default ContentThree;
