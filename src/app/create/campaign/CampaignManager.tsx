@@ -227,90 +227,26 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           <div key={content.id} className="bg-[#1a1f2e] p-4 rounded-lg">
             {isEditing && editingContent?.id === content.id ? (
               <form onSubmit={handleEditContent} className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      Genre
-                    </label>
-                    <select
-                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                      value={editingContent.genre}
-                      onChange={(e) =>
-                        setEditingContent({
-                          ...editingContent,
-                          genre: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="fantasy">Fantasy</option>
-                      <option value="sci-fi">Science Fiction</option>
-                      <option value="horror">Horror</option>
-                      <option value="modern">Modern</option>
-                      <option value="post-apocalyptic">Post-Apocalyptic</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      Tone
-                    </label>
-                    <select
-                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                      value={editingContent.tone}
-                      onChange={(e) =>
-                        setEditingContent({
-                          ...editingContent,
-                          tone: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="serious">Serious</option>
-                      <option value="lighthearted">Lighthearted</option>
-                      <option value="dark">Dark</option>
-                      <option value="comedic">Comedic</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      Setting
-                    </label>
-                    <select
-                      className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                      value={editingContent.setting}
-                      onChange={(e) =>
-                        setEditingContent({
-                          ...editingContent,
-                          setting: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="medieval">Medieval</option>
-                      <option value="urban">Urban</option>
-                      <option value="wilderness">Wilderness</option>
-                      <option value="space">Space</option>
-                      <option value="underwater">Underwater</option>
-                    </select>
-                  </div>
+                <div className="flex gap-4 text-xs text-gray-400 mb-3">
+                  {content.genre && (
+                    <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                      Genre: {content.genre}
+                    </span>
+                  )}
+                  {content.tone && (
+                    <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                      Tone: {content.tone}
+                    </span>
+                  )}
+                  {content.setting && (
+                    <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                      Setting: {content.setting}
+                    </span>
+                  )}
                 </div>
-
-                <div>
-                  <label className="block mb-2 text-sm font-medium">
-                    Description
-                  </label>
-                  <textarea
-                    className="w-full p-3 bg-[#2a2f3e] rounded-lg text-sm"
-                    value={editingContent.description}
-                    onChange={(e) =>
-                      setEditingContent({
-                        ...editingContent,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={4}
-                    required
-                  />
-                </div>
+                <p className="text-sm text-gray-400 mb-2">
+                  {content.description}
+                </p>
 
                 <div>
                   <label className="block mb-2 text-sm font-medium">
