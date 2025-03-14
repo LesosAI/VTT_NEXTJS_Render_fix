@@ -6,8 +6,10 @@ import CampaignManager from "./CampaignManager";
 
 export default function CreateCampaign() {
   const { username } = useLogin();
-  const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [campaigns, setCampaigns] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
 
   const [campaignData, setCampaignData] = useState({
@@ -105,7 +107,7 @@ export default function CreateCampaign() {
   };
 
   // Update handleCampaignSelect
-  const handleCampaignSelect = (campaign) => {
+  const handleCampaignSelect = (campaign: { id: string; name: string }) => {
     setSelectedCampaign(campaign.id);
     setCampaignData({
       name: campaign.name,
@@ -173,7 +175,7 @@ export default function CreateCampaign() {
             {/* Right Side - Campaign Description Form */}
             <div>
               {selectedCampaign ? (
-                <CampaignManager campaignId={selectedCampaign} />
+                <CampaignManager campaignId={parseInt(selectedCampaign)} />
               ) : (
                 <div className="bg-[#2a2f3e] rounded-lg p-6 text-center">
                   <p className="text-gray-400">
