@@ -20,94 +20,85 @@ export default function HeroSection() {
   };
 
   return (
-    <div>
-      <div className="navbar w-nav">
-        <div className="nav-container w-container">
-          <div className="nav-menu-wrapper">
-            <a href="/" className="brand w-nav-brand">
-             
-            </a>
-            <nav role="navigation" className="nav-menu w-nav-menu">
-              <div className="tablet-menu">
-                <a href="/" className="brand-tablet w-nav-brand">
-                  <PhotoIcon className="nav-logo-icon" width="27" height="27" />
-                </a>
-                <div
-                  className="close-menu-button w-nav-button"
-                  onClick={toggleMenu}
-                >
-                  <XMarkIcon
-                    className="nav-close-icon"
-                    width="24"
-                    height="24"
-                  />
-                </div>
-              </div>
-              <div className="menu-wrap">
-                <div className="nav-dropdown w-dropdown">
-                  <div className="nav-dropdown-toggle w-dropdown-toggle">
-                    <div className="nav-dropdown-icon w-icon-dropdown-toggle"></div>
-                    <a
-                      href="/login"
-                      className="nav-item-title"
-                      style={{ color: "rgb(255, 255, 255);" }}
-                    >
-                      Sign In
-                    </a>
-                  </div>
-                </div>
-                <div className="nav-dropdown w-dropdown">
-                  <div className="nav-dropdown-toggle w-dropdown-toggle">
-                    <div className="nav-dropdown-icon w-icon-dropdown-toggle"></div>
-                    <a
-                      href="/register"
-                      className="nav-item-title"
-                      style={{ color: "rgb(255, 255, 255);" }}
-                    >
-                      Sign Up
-                    </a>
-                  </div>
+    <div className="min-h-screen">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="w-24"></div>
+
+            <nav
+              className={`${
+                isMenuOpen
+                  ? "fixed inset-0 bg-black/95 flex items-center justify-center"
+                  : "hidden md:flex md:items-center"
+              }`}
+            >
+              <div className="flex flex-col md:flex-row items-center">
+                <div className="flex">
+                  <a
+                    href="/login"
+                    className="px-4 py-2 rounded-l-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-r-0"
+                  >
+                    Sign In
+                  </a>
+                  <a
+                    href="/register"
+                    className="px-4 py-2 rounded-r-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-l-0"
+                  >
+                    Sign Up
+                  </a>
                 </div>
               </div>
             </nav>
-            <div className="search-shop-con">
-              <a href="/signup" className="nav-button w-button">
+
+            <div className="flex items-center">
+              <a
+                href="/signup"
+                className="hidden md:inline-flex px-6 py-2 rounded-full border border-white/30 text-white bg-white/20 hover:bg-white/30 transition-colors"
+              >
                 Get Started
               </a>
-            </div>
-            <div className="menu-button w-nav-button" onClick={toggleMenu}>
-              <Bars3Icon className="image-burger" width="24" height="24" />
+              <button onClick={toggleMenu} className="md:hidden text-white">
+                <Bars3Icon className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="background-video w-background-video w-background-video-atom">
+      <div className="relative min-h-screen pt-20 pb-20 bg-gradient-to-b from-[#e900264d] to-black">
         <video
           autoPlay
           loop
           muted
           playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-80 -z-10"
           style={{ backgroundImage: `url(${posterUrl})` }}
         >
           <source src={videoMp4Url} type="video/mp4" />
           <source src={videoWebmUrl} type="video/webm" />
         </video>
 
-        <div className="banner-info-bottom-wrapper">
-          <h1 className="banner-title-large">
-            Welcome to <span className="secondary-text-span">ForgeLab</span>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-64 md:pt-[28rem] text-center relative z-10">
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6">
+            Welcome to <span className="italic">ForgeLab</span>
           </h1>
-          <p className="banner-description-large">
+          <p className="text-lg md:text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
             Generate immersive campaign art and content for your virtual
             tabletop adventures. Bring your stories to life with our powerful
             creation tools.
           </p>
-          <div className="buttons-wrapper">
-            <a href="/signup" className="primary-button w-button">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <a
+              href="/signup"
+              className="w-full sm:w-auto px-8 py-3 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-lg font-medium"
+            >
               Get Started
             </a>
-            <a href="/signin" className="primary-button-white w-button">
+            <a
+              href="/signin"
+              className="w-full sm:w-auto px-8 py-3 rounded-full border border-white/30 text-white hover:bg-white/10 transition-colors text-lg font-medium"
+            >
               Sign In
             </a>
           </div>

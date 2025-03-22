@@ -5,7 +5,7 @@ import FeaturedWork from "./landing/FeaturedWork";
 import ContentTwo from "./landing/ContentTwo";
 import ContentThree from "./landing/ContentThree";
 import FooterSection from "./landing/FooterSection";
-import "./landing.css";
+// import "./landing.css";
 import Image from "next/image";
 export default function LandingPage() {
   return (
