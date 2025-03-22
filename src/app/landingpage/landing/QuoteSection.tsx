@@ -1,27 +1,30 @@
 const QuoteSection = () => {
   return (
-    <section className="section white-background">
-      <div className="w-layout-blockcontainer base-container w-container">
-        <div className="quote-wrapper-with-line">
-          <div className="text-full-width dark">
+    <section className="bg-white py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-xl md:text-2xl text-black">
             "VTT empowers Game Masters and creators to bring their campaigns to
             life.{" "}
-            <span className="secondary-text-span primary-text-color">
+            <span className="text-[#e90026]">
               Our AI-powered platform generates stunning visuals and immersive
               content
             </span>{" "}
             to help you{" "}
-            <span className="secondary-text-span primary-text-color">
+            <span className="text-[#e90026]">
               craft unforgettable adventures for your players
             </span>
             ."
           </div>
-          <div className="quote-author-wrapper">
-            <h6 className="text-color-dark">
-              <strong className="bold-text">Start Creating Today</strong>
+          <div className="space-y-2">
+            <h6 className="text-lg font-bold text-black">
+              Start Creating Today
             </h6>
-            <p className="paragraph-small text-color-dark">
-              <a href="/signup" className="text-link">
+            <p className="text-sm text-black">
+              <a
+                href="/signup"
+                className="hover:text-[#e90026] transition-colors"
+              >
                 Create Your Account
               </a>
             </p>
