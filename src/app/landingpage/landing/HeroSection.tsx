@@ -21,7 +21,7 @@ export default function HeroSection() {
 
   return (
     <div className="min-h-screen">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="w-24"></div>
@@ -37,13 +37,13 @@ export default function HeroSection() {
                 <div className="flex">
                   <a
                     href="/login"
-                    className="px-4 py-2 rounded-l-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-r-0"
+                    className="px-6 py-3 rounded-l-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-r-0 text-lg"
                   >
                     Sign In
                   </a>
                   <a
                     href="/register"
-                    className="px-4 py-2 rounded-r-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-l-0"
+                    className="px-6 py-3 rounded-r-full border border-white/30 text-white bg-black/40 hover:bg-black/60 transition-colors border-l-0 text-lg"
                   >
                     Sign Up
                   </a>
@@ -54,7 +54,7 @@ export default function HeroSection() {
             <div className="flex items-center">
               <a
                 href="/signup"
-                className="hidden md:inline-flex px-6 py-2 rounded-full border border-white/30 text-white bg-white/20 hover:bg-white/30 transition-colors"
+                className="hidden md:inline-flex px-8 py-3 rounded-full border border-white/30 text-white bg-white/20 hover:bg-white/30 transition-colors text-lg"
               >
                 Get Started
               </a>
@@ -91,13 +91,13 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <a
               href="/signup"
-              className="w-full sm:w-auto px-8 py-3 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-lg font-medium"
+              className="w-full sm:w-auto px-10 py-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-xl font-medium"
             >
               Get Started
             </a>
             <a
               href="/signin"
-              className="w-full sm:w-auto px-8 py-3 rounded-full border border-white/30 text-white hover:bg-white/10 transition-colors text-lg font-medium"
+              className="w-full sm:w-auto px-10 py-4 rounded-full border border-white/30 text-white hover:bg-white/10 transition-colors text-xl font-medium"
             >
               Sign In
             </a>
