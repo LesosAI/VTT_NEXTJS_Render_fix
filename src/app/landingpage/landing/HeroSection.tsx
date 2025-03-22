@@ -33,6 +33,14 @@ export default function HeroSection() {
                   : "hidden md:flex md:items-center"
               }`}
             >
+              {isMenuOpen && (
+                <button
+                  onClick={toggleMenu}
+                  className="absolute top-4 right-4 text-white"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              )}
               <div className="flex flex-col md:flex-row items-center">
                 <div className="flex">
                   <a
