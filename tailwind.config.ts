@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			sentient: ['Sentient', 'serif'],
+		  },
   		colors: {
   			background: 'var(--background)',
   			foreground: 'var(--foreground)'

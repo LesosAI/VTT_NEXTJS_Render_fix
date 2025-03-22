@@ -66,13 +66,13 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="relative min-h-screen pt-20 pb-20 bg-gradient-to-b from-[#e900264d] to-black">
+      <div className="relative min-h-screen pt-20 pb-20 bg-gradient-to-b from-[#e9002680] to-black">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-80 -z-10"
+          className="absolute inset-0 w-full h-full object-cover -z-10"
           style={{ backgroundImage: `url(${posterUrl})` }}
         >
           <source src={videoMp4Url} type="video/mp4" />
@@ -81,7 +81,7 @@ export default function HeroSection() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-64 md:pt-[28rem] text-center relative z-10">
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6">
-            Welcome to <span className="italic">ForgeLab</span>
+            Welcome to <span className="font-sentient italic">ForgeLab</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
             Generate immersive campaign art and content for your virtual
