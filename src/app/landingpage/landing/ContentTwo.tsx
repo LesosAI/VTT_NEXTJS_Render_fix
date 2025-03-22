@@ -17,78 +17,38 @@ const ContentTwo = () => {
   ];
 
   return (
-    <section className="section-dark large-space overflow-hidden">
-      <div className="artist-slider-wrapper">
-        <div className="text-info-small-width">
-          <h2 className="margin-bottom-medium">
-            <span className="secondary-text-span">Our </span>
+    <section className="bg-black py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-4xl mx-auto mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <span className="text-[#e90026]">Our </span>
             Demo Examples
           </h2>
-          <p>
+          <p className="text-lg md:text-xl text-gray-200">
             Experience ForgeLab's powerful campaign and art generation tools.
             Create stunning visuals and engaging campaigns for your virtual
             tabletop adventures.
           </p>
         </div>
-        <div
-          className="demo-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "2rem",
-            marginTop: "3rem",
-            maxWidth: "900px",
-            margin: "3rem auto 0",
-          }}
-        >
+        <div className="grid md:grid-cols-2 gap-8 mt-12">
           {demos.map((demo, index) => (
             <div
               key={index}
-              style={{
-                backgroundColor: "#1a1a1a",
-                borderRadius: "12px",
-                overflow: "hidden",
-                transition: "transform 0.3s ease",
-                cursor: "pointer",
-              }}
+              className="bg-[#1a1a1a] rounded-lg overflow-hidden hover:transform hover:scale-105 transition-transform duration-300 cursor-pointer"
             >
-              <div className="demo-card">
-                <div style={{ position: "relative", height: "320px" }}>
-                  <Image
-                    src={demo.imageSrc}
-                    alt={demo.title}
-                    fill
-                    style={{
-                      objectFit: "cover",
-                      objectPosition: "center top",
-                    }}
-                  />
-                </div>
-                <div
-                  style={{
-                    padding: "1.5rem",
-                    borderTop: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <h4
-                    className="title-hover-white"
-                    style={{
-                      marginBottom: "0.5rem",
-                      fontSize: "1.25rem",
-                    }}
-                  >
-                    {demo.title}
-                  </h4>
-                  <p
-                    style={{
-                      color: "#888",
-                      fontSize: "0.9rem",
-                      margin: 0,
-                    }}
-                  >
-                    {demo.description}
-                  </p>
-                </div>
+              <div className="relative h-80">
+                <Image
+                  src={demo.imageSrc}
+                  alt={demo.title}
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+              <div className="p-6 border-t border-white/10">
+                <h4 className="text-xl text-white mb-2 hover:text-white transition-colors">
+                  {demo.title}
+                </h4>
+                <p className="text-gray-400 text-sm">{demo.description}</p>
               </div>
             </div>
           ))}
