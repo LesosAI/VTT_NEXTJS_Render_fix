@@ -65,12 +65,7 @@ function RegisterForm() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-sm mx-auto w-full px-4 py-8"
-    >
+    <>
       <h1 className="text-4xl text-white font-bold mb-8">
         Ready to Get Started?
       </h1>
@@ -202,39 +197,68 @@ function RegisterForm() {
           </Link>
         </div>
       </div>
-    </motion.div>
+    </>
   );
 }
 
 export default function Register() {
+  const [posterUrl] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"
+  );
+  const [videoMp4Url] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.mp4"
+  );
+  const [videoWebmUrl] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.webm"
+  );
+
   return (
-    <main className="bg-[#0e1826]">
-      <div className="relative flex">
-        <div className="w-full md:w-1/2">
-          <div className="min-h-[100dvh] h-full flex flex-col after:flex-1">
-            <div className="flex-1">
-              <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                <Link href="/" className="block">
-                  <svg width="32" height="32" viewBox="0 0 32 32">
-                    {/* ... existing SVG code ... */}
-                  </svg>
-                </Link>
-              </div>
-            </div>
+    <main className="min-h-screen w-full relative overflow-hidden">
+      {/* Full-screen video background */}
+      <div className="absolute inset-0 w-full h-full before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ backgroundImage: `url(${posterUrl})` }}
+          poster={posterUrl}
+        >
+          <source src={videoMp4Url} type="video/mp4" />
+          <source src={videoWebmUrl} type="video/webm" />
+        </video>
+      </div>
+
+      {/* Modal Container */}
+      <div className="relative z-20 flex items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-[#0e1826]/90 backdrop-blur-lg rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-w-xl w-full mx-4"
+        >
+          {/* Video section */}
+          <div className="h-[300px] relative rounded-t-xl overflow-hidden before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{ backgroundImage: `url(${posterUrl})` }}
+              poster={posterUrl}
+            >
+              <source src={videoMp4Url} type="video/mp4" />
+              <source src={videoWebmUrl} type="video/webm" />
+            </video>
+          </div>
+
+          {/* Content section */}
+          <div className="p-8">
             <RegisterForm />
           </div>
-        </div>
-
-        <div className="hidden md:block md:w-1/2 relative" aria-hidden="true">
-          <Image
-            className="object-cover"
-            src="/images/697683_Warrior charging in combat with his shiny armor.png"
-            alt="Authentication"
-            priority
-            fill
-            sizes="50vw"
-          />
-        </div>
+        </motion.div>
       </div>
     </main>
   );
