@@ -52,7 +52,7 @@ const ContentTwo = () => {
                 cursor: "pointer",
               }}
             >
-              <a href={demo.href} className="demo-card">
+              <div className="demo-card">
                 <div style={{ position: "relative", height: "320px" }}>
                   <Image
                     src={demo.imageSrc}
@@ -89,7 +89,7 @@ const ContentTwo = () => {
                     {demo.description}
                   </p>
                 </div>
-              </a>
+              </div>
             </div>
           ))}
         </div>
