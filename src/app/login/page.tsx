@@ -135,95 +135,116 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-[#0e1826]/90 backdrop-blur-lg rounded-xl shadow-2xl max-w-sm w-full mx-4 p-8"
+          className="bg-[#0e1826]/90 backdrop-blur-lg rounded-xl shadow-2xl max-w-sm w-full mx-4"
         >
-          <h1 className="text-4xl text-white font-bold mb-8">Welcome Back!</h1>
-          {/* Form */}
-          <form onSubmit={handleLogin}>
-            <div className="space-y-6">
-              <div>
-                <Label
-                  className="block text-sm font-medium mb-2 text-white/80"
-                  htmlFor="email"
-                >
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="form-input w-full h-10 bg-[#0e1826] border-2 border-white/20 text-white placeholder-white/50 rounded-lg px-3 py-2 transition-all duration-150 ease-in-out focus:border-white focus:ring-1 focus:ring-white"
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <div>
-                <Label
-                  className="block text-sm font-medium mb-2 text-white/80"
-                  htmlFor="password"
-                >
-                  Password
-                </Label>
-                <div className="relative">
+          {/* Video section */}
+          <div className="h-48 relative rounded-t-xl overflow-hidden">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{ backgroundImage: `url(${posterUrl})` }}
+              poster={posterUrl}
+            >
+              <source src={videoMp4Url} type="video/mp4" />
+              <source src={videoWebmUrl} type="video/webm" />
+            </video>
+          </div>
+
+          {/* Content section */}
+          <div className="p-8">
+            <h1 className="text-4xl text-white font-bold mb-8">
+              Welcome Back!
+            </h1>
+            {/* Form */}
+            <form onSubmit={handleLogin}>
+              <div className="space-y-6">
+                <div>
+                  <Label
+                    className="block text-sm font-medium mb-2 text-white/80"
+                    htmlFor="email"
+                  >
+                    Email Address
+                  </Label>
                   <Input
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="form-input w-full h-10 bg-[#0e1826] border-2 border-white/20 text-white placeholder-white/50 rounded-lg px-3 py-2 transition-all duration-150 ease-in-out focus:border-white focus:ring-1 focus:ring-white"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="on"
-                    placeholder="Enter your password"
+                    type="email"
+                    placeholder="Enter your email"
                     required
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white"
-                    onClick={() => setShowPassword(!showPassword)}
+                </div>
+                <div>
+                  <Label
+                    className="block text-sm font-medium mb-2 text-white/80"
+                    htmlFor="password"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="form-input w-full h-10 bg-[#0e1826] border-2 border-white/20 text-white placeholder-white/50 rounded-lg px-3 py-2 transition-all duration-150 ease-in-out focus:border-white focus:ring-1 focus:ring-white"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="on"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between mt-8">
-              <div className="mr-1">
-                <Link
-                  className="text-sm text-white/80 hover:text-white transition-colors duration-150"
-                  href="/reset-password"
+              <div className="flex items-center justify-between mt-8">
+                <div className="mr-1">
+                  <Link
+                    className="text-sm text-white/80 hover:text-white transition-colors duration-150"
+                    href="/reset-password"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
+                <Button
+                  type="submit"
+                  className="btn bg-white hover:bg-white/90 text-[#0e1826] font-semibold px-6 py-2.5 rounded-lg transition-all duration-150 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap ml-3"
                 >
-                  Forgot Password?
+                  Sign In
+                </Button>
+              </div>
+            </form>
+            {errorMessage && bannerErrorOpen && (
+              <Banner type="error" onClose={() => setBannerErrorOpen(false)}>
+                {errorMessage}
+              </Banner>
+            )}
+            {/* Footer */}
+            <div className="pt-6 mt-8 border-t border-white/10">
+              <div className="text-sm text-white/80">
+                Don&apos;t you have an account?{" "}
+                <Link
+                  className="font-medium text-white hover:text-white/90 transition-colors duration-150"
+                  href="/register"
+                >
+                  Sign Up
                 </Link>
               </div>
-              <Button
-                type="submit"
-                className="btn bg-white hover:bg-white/90 text-[#0e1826] font-semibold px-6 py-2.5 rounded-lg transition-all duration-150 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap ml-3"
-              >
-                Sign In
-              </Button>
-            </div>
-          </form>
-          {errorMessage && bannerErrorOpen && (
-            <Banner type="error" onClose={() => setBannerErrorOpen(false)}>
-              {errorMessage}
-            </Banner>
-          )}
-          {/* Footer */}
-          <div className="pt-6 mt-8 border-t border-white/10">
-            <div className="text-sm text-white/80">
-              Don&apos;t you have an account?{" "}
-              <Link
-                className="font-medium text-white hover:text-white/90 transition-colors duration-150"
-                href="/register"
-              >
-                Sign Up
-              </Link>
             </div>
           </div>
         </motion.div>
