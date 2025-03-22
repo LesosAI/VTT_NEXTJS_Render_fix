@@ -19,6 +19,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useLogin();
+  const [posterUrl] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"
+  );
+  const [videoMp4Url] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.mp4"
+  );
+  const [videoWebmUrl] = useState(
+    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.webm"
+  );
 
   // Clear error when email or password changes
   useEffect(() => {
@@ -212,15 +221,22 @@ export default function LoginPage() {
         </div>
 
         {/* Image */}
-        <div className="hidden md:block md:w-1/2 relative" aria-hidden="true">
-          <Image
-            className="object-cover"
-            src="/images/697683_Warrior charging in combat with his shiny armor.png"
-            alt="Authentication"
-            priority
-            fill
-            sizes="50vw"
-          />
+        <div
+          className="hidden md:block md:w-1/2 relative overflow-hidden before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]"
+          aria-hidden="true"
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ backgroundImage: `url(${posterUrl})` }}
+            poster={posterUrl}
+          >
+            <source src={videoMp4Url} type="video/mp4" />
+            <source src={videoWebmUrl} type="video/webm" />
+          </video>
         </div>
       </div>
     </main>
