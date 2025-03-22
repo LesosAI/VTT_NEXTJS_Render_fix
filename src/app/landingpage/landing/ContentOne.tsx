@@ -51,7 +51,7 @@ const ContentOne: React.FC<ContentOneProps> = () => {
               </p>
               <div className="pt-4">
                 <button
-                  onClick={() => router.push("/signup")}
+                  onClick={() => router.push("/register")}
                   className="w-full sm:w-auto px-10 py-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-xl font-medium"
                 >
                   Sign Up

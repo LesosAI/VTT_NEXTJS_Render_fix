@@ -61,7 +61,7 @@ export default function HeroSection() {
 
             <div className="flex items-center">
               <a
-                href="/signup"
+                href="/register"
                 className="hidden md:inline-flex px-8 py-3 rounded-full border border-white/30 text-white bg-white/20 hover:bg-white/30 transition-colors text-lg"
               >
                 Get Started
@@ -98,7 +98,7 @@ export default function HeroSection() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <a
-              href="/signup"
+              href="/register"
               className="w-full sm:w-auto px-10 py-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-xl font-medium"
             >
               Get Started
