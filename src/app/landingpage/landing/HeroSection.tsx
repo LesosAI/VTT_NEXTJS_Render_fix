@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Bars3Icon, XMarkIcon, PhotoIcon } from "@heroicons/react/24/outline";
-
+import NextImage from "next/image";
 export default function HeroSection() {
   const [posterUrl] = useState(
     "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"

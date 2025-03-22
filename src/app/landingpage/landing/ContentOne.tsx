@@ -9,100 +9,62 @@ interface ContentOneProps {
 
 const ContentOne: React.FC<ContentOneProps> = () => {
   const router = useRouter();
-  const posterUrl =
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a670d2d2e8cb8b1bb3974d_art video -poster-00001.jpg";
-  const videoMp4Url =
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a670d2d2e8cb8b1bb3974d_art video -transcode.mp4";
-  const videoWebmUrl =
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a670d2d2e8cb8b1bb3974d_art video -transcode.webm";
 
   return (
     <div>
-      <section className="section-dark large-space">
-        <div className="w-layout-blockcontainer base-container w-container">
-          <div
-            data-w-id="38a750d2-cae0-6b8a-9702-b61ae2a82d1e"
-            style={{
-              opacity: 1,
-              transform:
-                "translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg)",
-              transformStyle: "preserve-3d",
-            }}
-            className="full-width"
-          >
-            <div className="text-holder-medium margin-bottom-large">
-              <h2>
-                ForgeLab — Your Gateway to{" "}
-                <span className="secondary-text-span">Creative Campaigns</span>{" "}
-                and{" "}
-                <span className="secondary-text-span">
-                  Virtual Tabletop Art
-                </span>
-              </h2>
-            </div>
-            <div
-              data-w-id="27dac7b2-8482-53ef-dd45-360898bbf338"
-              style={{
-                opacity: 1,
-                transform:
-                  "translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg)",
-                transformStyle: "preserve-3d",
-              }}
-              className="text-full-width"
-            >
+      {/* First Section */}
+      <section className="bg-black py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-12">
+              ForgeLab — Your Gateway to{" "}
+              <span className="text-[#e90026]">Creative Campaigns</span> and{" "}
+              <span className="text-[#e90026]">Virtual Tabletop Art</span>
+            </h2>
+            <p className="text-lg md:text-xl text-gray-200">
               Elevate your virtual tabletop experience with{" "}
-              <span className="secondary-text-span primary-text-color">
+              <span className="text-[#e90026]">
                 custom-generated campaigns and stunning artwork
               </span>
               . Whether you're a GM or player, ForgeLab helps you bring your
               imagination to life.
-            </div>
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="section-dark large-bottom-space">
-        <div className="w-layout-blockcontainer base-container w-container">
-          <div className="display-flex-horizontal large-gap-tablet-wrap">
-            <div className="column-wrapper flex-vertical-space-between">
-              <div>
-                <div className="text-full-width margin-bottom-xmedium">
-                  Create{" "}
-                  <span className="secondary-text-span primary-text-color">
-                    immersive
-                  </span>{" "}
-                  campaigns and generate{" "}
-                  <span className="secondary-text-span primary-text-color">
-                    stunning
-                  </span>{" "}
-                  artwork for your adventures.
-                </div>
-                <p className="description-xmedium">
-                  Join our platform to access powerful tools for campaign
-                  generation and custom art creation tailored for virtual
-                  tabletop gaming.
-                </p>
-              </div>
-              <div
-                className="margin-top-medium display-flex-horizontal"
-                style={{ gap: "1rem" }}
-              >
+      {/* Second Section */}
+      <section className="bg-black py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <p className="text-xl md:text-2xl text-white">
+                Create <span className="text-[#e90026]">immersive</span>{" "}
+                campaigns and generate{" "}
+                <span className="text-[#e90026]">stunning</span> artwork for
+                your adventures.
+              </p>
+              <p className="text-lg text-gray-200">
+                Join our platform to access powerful tools for campaign
+                generation and custom art creation tailored for virtual tabletop
+                gaming.
+              </p>
+              <div className="pt-4">
                 <button
                   onClick={() => router.push("/signup")}
-                  className="secondary-button w-button"
-                  style={{ flex: 1 }}
+                  className="w-full sm:w-auto px-10 py-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors text-xl font-medium"
                 >
                   Sign Up
                 </button>
               </div>
             </div>
-            <div className="video-wrapper">
+            <div className="relative rounded-lg overflow-hidden">
               <Image
                 src="/Leonardo_4.avif"
                 alt="logo"
                 width={600}
                 height={400}
-                style={{ width: "100%", height: "auto" }}
+                className="w-full h-auto"
               />
             </div>
           </div>
