@@ -124,11 +124,11 @@ export default function CreateCampaign() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="w-full max-w-[1800px] mx-auto">
           <h1 className="text-2xl font-bold mb-8">Campaign Manager</h1>
 
-          <div className="grid grid-cols-[300px_1fr] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 lg:gap-8">
             {/* Left Sidebar - Campaigns List */}
             <div className="space-y-4">
               <div className="flex justify-between items-center mb-4">
@@ -155,7 +155,7 @@ export default function CreateCampaign() {
                 </button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[200px] lg:max-h-none overflow-y-auto lg:overflow-visible">
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign.id}
@@ -173,11 +173,11 @@ export default function CreateCampaign() {
             </div>
 
             {/* Right Side - Campaign Description Form */}
-            <div>
+            <div className="mt-4 lg:mt-0">
               {selectedCampaign ? (
                 <CampaignManager campaignId={parseInt(selectedCampaign)} />
               ) : (
-                <div className="bg-[#2a2f3e] rounded-lg p-6 text-center">
+                <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 text-center">
                   <p className="text-gray-400">
                     Select a campaign or create a new one to get started
                   </p>
@@ -190,8 +190,8 @@ export default function CreateCampaign() {
 
       {/* New Campaign Modal */}
       {showNewCampaignModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-[#2a2f3e] rounded-lg p-6 w-96">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 w-full max-w-[400px]">
             <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
