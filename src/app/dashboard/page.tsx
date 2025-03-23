@@ -194,7 +194,7 @@ export default function Dashboard() {
               />
 
               {/* Generate Button */}
-              <div className="relative">
+              <div className="relative flex justify-end">
                 <button
                   onClick={() => setIsGenerateOpen(!isGenerateOpen)}
                   className="px-6 py-2.5 bg-[#2a2f3e] rounded-lg hover:bg-[#3a3f4e] transition-colors font-medium whitespace-nowrap flex items-center gap-2"
@@ -203,7 +203,7 @@ export default function Dashboard() {
                 </button>
 
                 {isGenerateOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-[#2a2f3e] rounded-lg shadow-lg py-2 z-10 border border-gray-700/30">
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-[#2a2f3e] rounded-lg shadow-lg py-2 z-10 border border-gray-700/30 max-w-[calc(100vw-2rem)]">
                     <Link
                       href="/create/character"
                       className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"

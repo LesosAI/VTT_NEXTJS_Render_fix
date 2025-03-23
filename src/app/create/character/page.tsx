@@ -117,10 +117,10 @@ export default function CreateCharacter() {
 
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-[350px_1fr] gap-10"
+            className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-4 lg:gap-10"
           >
             {/* Left Column - Controls */}
-            <div className="space-y-6 sticky top-8">
+            <div className="space-y-6 lg:sticky lg:top-8">
               {/* Style Selection */}
               <div className="w-full">
                 <label className="block mb-2 text-sm font-medium">
@@ -299,11 +299,11 @@ export default function CreateCharacter() {
           </form>
 
           {/* Add Character History Section */}
-          <div className="mt-12">
-            <h2 className="text-xl font-bold mb-6">
+          <div className="mt-8 lg:mt-12">
+            <h2 className="text-xl font-bold mb-4 lg:mb-6">
               Previously Generated Characters
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {characterHistory.map((character) => (
                 <div
                   key={character.id}
