@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode } from "react";
-import Cookies from 'js-cookie';  // You'll need to install this package
+import Cookies from "js-cookie"; // You'll need to install this package
+import { useRouter } from "next/navigation";
 
 interface LoginContextProps {
   isLoggedIn: boolean;
@@ -26,9 +27,11 @@ interface LoginProviderProps {
 }
 
 export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
+  const router = useRouter();
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     // Check if we're in a browser environment first
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Remove the token check since we're not using it yet
       return Cookies.get("isLoggedIn") === "true";
     }
@@ -37,14 +40,14 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
 
   const [username, setUsername] = useState<string>(() => {
     // Check if we're in a browser environment first
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return Cookies.get("username") || "";
     }
     return "";
   });
 
   const [isSubaccount, setIsSubaccount] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return Cookies.get("isSubaccount") === "true";
     }
     return false;
@@ -54,21 +57,21 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
     setIsLoggedIn(true);
     setUsername(user);
     setIsSubaccount(isSubaccount);
-    
-    Cookies.set("isLoggedIn", "true", { 
+
+    Cookies.set("isLoggedIn", "true", {
       secure: true,
-      sameSite: 'strict',
-      expires: 7
+      sameSite: "strict",
+      expires: 7,
     });
     Cookies.set("username", user, {
       secure: true,
-      sameSite: 'strict',
-      expires: 7
+      sameSite: "strict",
+      expires: 7,
     });
     Cookies.set("isSubaccount", isSubaccount.toString(), {
       secure: true,
-      sameSite: 'strict',
-      expires: 7
+      sameSite: "strict",
+      expires: 7,
     });
   };
 
@@ -79,10 +82,13 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
     Cookies.remove("isLoggedIn");
     Cookies.remove("username");
     Cookies.remove("isSubaccount");
+    router.push("/landingpage");
   };
 
   return (
-    <LoginContext.Provider value={{ isLoggedIn, username, isSubaccount, login, logout }}>
+    <LoginContext.Provider
+      value={{ isLoggedIn, username, isSubaccount, login, logout }}
+    >
       {children}
     </LoginContext.Provider>
   );
