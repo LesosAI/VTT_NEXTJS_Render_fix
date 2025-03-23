@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Bars3Icon,
-  UserCircleIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useLogin } from "@/context/LoginContext";
 
@@ -63,17 +59,13 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          className="p-2 hover:bg-[#3a3f4e] rounded-lg transition-colors"
-          onClick={() => {}}
-        >
-          <InformationCircleIcon className="w-6 h-6" />
-        </button>
-
         <span className="text-white">{username}</span>
-        <button className="p-2 hover:bg-[#3a3f4e] rounded-lg transition-colors">
+        <Link
+          href="/account"
+          className="p-2 hover:bg-[#3a3f4e] rounded-lg transition-colors"
+        >
           <UserCircleIcon className="w-6 h-6" />
-        </button>
+        </Link>
       </div>
     </div>
   );
