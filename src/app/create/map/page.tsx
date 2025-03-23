@@ -86,23 +86,23 @@ export default function CreateMap() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="w-full max-w-[1800px] mx-auto">
-          <h1 className="text-2xl font-bold mb-8">Create Map</h1>
+          <h1 className="text-2xl font-bold mb-6 sm:mb-8">Create Map</h1>
 
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-[350px_1fr] gap-10"
+            className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 lg:gap-10"
           >
             {/* Left Column - Controls */}
-            <div className="space-y-6 sticky top-8">
+            <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-8">
               {/* Style Selection */}
               <div className="w-full">
                 <label className="block mb-2 text-sm font-medium">
                   Map Style
                 </label>
                 <select
-                  className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
+                  className="w-full p-2.5 bg-[#2a2f3e] rounded-lg text-sm"
                   value={mapData.style}
                   onChange={(e) =>
                     setMapData({ ...mapData, style: e.target.value })
@@ -121,7 +121,7 @@ export default function CreateMap() {
                   Map Tone
                 </label>
                 <select
-                  className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
+                  className="w-full p-2.5 bg-[#2a2f3e] rounded-lg text-sm"
                   value={mapData.tone}
                   onChange={(e) =>
                     setMapData({ ...mapData, tone: e.target.value })
@@ -159,14 +159,14 @@ export default function CreateMap() {
             </div>
 
             {/* Right Column - Description and Preview */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Description Input */}
               <div className="w-full">
                 <label className="block mb-2 text-base font-medium">
                   Map Description
                 </label>
                 <textarea
-                  className="w-full p-3 bg-[#2a2f3e] rounded-lg text-base min-h-[150px]"
+                  className="w-full p-3 bg-[#2a2f3e] rounded-lg text-base min-h-[120px] sm:min-h-[150px]"
                   value={mapData.description}
                   onChange={(e) =>
                     setMapData({ ...mapData, description: e.target.value })
@@ -180,7 +180,7 @@ export default function CreateMap() {
                 <button
                   type="submit"
                   disabled={!mapData.description.trim() || isGenerating}
-                  className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
+                  className={`w-full sm:w-auto py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 ${
                     !mapData.description.trim() || isGenerating
                       ? "bg-gray-600 cursor-not-allowed opacity-50"
                       : "bg-blue-600 hover:bg-blue-700"
@@ -214,8 +214,10 @@ export default function CreateMap() {
 
               {/* Preview Area */}
               {generatedImage && (
-                <div className="mt-6 w-full">
-                  <h2 className="text-xl font-bold mb-3">Generated Preview</h2>
+                <div className="mt-4 sm:mt-6 w-full">
+                  <h2 className="text-xl font-bold mb-2 sm:mb-3">
+                    Generated Preview
+                  </h2>
                   <img
                     src={generatedImage}
                     alt="Generated map preview"
@@ -226,12 +228,12 @@ export default function CreateMap() {
             </div>
           </form>
 
-          {/* Add Map History Section after the form */}
-          <div className="mt-12">
-            <h2 className="text-xl font-bold mb-6">
+          {/* Map History Section */}
+          <div className="mt-8 sm:mt-12">
+            <h2 className="text-xl font-bold mb-4 sm:mb-6">
               Previously Generated Maps
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {mapHistory.map((map) => (
                 <div
                   key={map.id}
@@ -241,13 +243,15 @@ export default function CreateMap() {
                   <img
                     src={map.image_url}
                     alt="Generated map"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-36 sm:h-48 object-cover"
                   />
-                  <div className="p-4">
+                  <div className="p-3 sm:p-4">
                     <p className="text-sm text-gray-300 mb-2">
                       Style: {map.style} | Tone: {map.tone}
                     </p>
-                    <p className="text-sm text-gray-400">{map.description}</p>
+                    <p className="text-sm text-gray-400 line-clamp-2">
+                      {map.description}
+                    </p>
                     <p className="text-xs text-gray-500 mt-2">
                       {new Date(map.created_at).toLocaleDateString()}
                     </p>
