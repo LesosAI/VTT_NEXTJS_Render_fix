@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [images, setImages] = useState<Character[]>([]);
   const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasGameMaster, setHasGameMaster] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,8 +79,21 @@ export default function Dashboard() {
       }
     };
 
+    const fetchPermissions = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`
+        );
+        const data = await response.json();
+        setHasGameMaster(data.has_game_master);
+      } catch (error) {
+        console.error("Failed to fetch permissions:", error);
+      }
+    };
+
     if (username) {
       fetchData();
+      fetchPermissions();
     }
   }, [username]);
 
@@ -210,18 +224,37 @@ export default function Dashboard() {
                     >
                       Create Character
                     </Link>
-                    <Link
-                      href="/create/map"
-                      className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
-                    >
-                      Create Map
-                    </Link>
-                    <Link
-                      href="/create/campaign"
-                      className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
-                    >
-                      Create Campaign
-                    </Link>
+                    {hasGameMaster ? (
+                      <>
+                        <Link
+                          href="/create/map"
+                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
+                        >
+                          Create Map
+                        </Link>
+                        <Link
+                          href="/create/campaign"
+                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
+                        >
+                          Create Campaign
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/select-plan"
+                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
+                        >
+                          Create Map (Game Master Only)
+                        </Link>
+                        <Link
+                          href="/select-plan"
+                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
+                        >
+                          Create Campaign (Game Master Only)
+                        </Link>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
