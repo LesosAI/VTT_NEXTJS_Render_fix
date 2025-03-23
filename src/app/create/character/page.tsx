@@ -23,6 +23,7 @@ export default function CreateCharacter() {
     tags: [] as string[],
   });
   const [newTag, setNewTag] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [generatedImage, setGeneratedImage] = useState("");
   const [characterHistory, setCharacterHistory] = useState<Character[]>([]);
@@ -70,6 +71,7 @@ export default function CreateCharacter() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsGenerating(true);
 
     try {
       const response = await fetch(
@@ -101,6 +103,8 @@ export default function CreateCharacter() {
     } catch (error) {
       console.error("Error generating image:", error);
       // You might want to show an error message to the user
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -247,14 +251,36 @@ export default function CreateCharacter() {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={!characterData.description.trim()}
-                  className={`py-2 px-4 rounded-lg font-medium text-sm ${
-                    characterData.description.trim()
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-gray-600 cursor-not-allowed opacity-50"
+                  disabled={!characterData.description.trim() || isGenerating}
+                  className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
+                    !characterData.description.trim() || isGenerating
+                      ? "bg-gray-600 cursor-not-allowed opacity-50"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
-                  Generate Character
+                  {isGenerating ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Working...
+                    </>
+                  ) : (
+                    "Generate Character"
+                  )}
                 </button>
               </div>
 
