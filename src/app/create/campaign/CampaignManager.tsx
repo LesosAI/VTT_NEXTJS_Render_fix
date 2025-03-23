@@ -19,6 +19,7 @@ interface Content {
 export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const { username } = useLogin();
   const [contents, setContents] = useState<Content[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [newContent, setNewContent] = useState({
     description: "",
     genre: "fantasy",
@@ -63,6 +64,8 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
 
   const handleGenerateContent = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsGenerating(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/generate`,
@@ -89,6 +92,8 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
       }
     } catch (error) {
       console.error("Error generating content:", error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -257,9 +262,36 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
         </div>
         <button
           type="submit"
-          className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm"
+          disabled={!newContent.description.trim() || isGenerating}
+          className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
+            !newContent.description.trim() || isGenerating
+              ? "bg-gray-600 cursor-not-allowed opacity-50"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          Generate Content
+          {isGenerating ? (
+            <>
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Working...
+            </>
+          ) : (
+            "Generate Content"
+          )}
         </button>
       </form>
 
