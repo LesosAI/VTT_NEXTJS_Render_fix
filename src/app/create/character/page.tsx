@@ -121,6 +121,24 @@ export default function CreateCharacter() {
           >
             {/* Left Column - Controls */}
             <div className="space-y-6 lg:sticky lg:top-8">
+              {/* Navigation Buttons */}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/create/campaign")}
+                  className="w-full py-2.5 px-4 bg-[#2a2f3e] hover:bg-[#3a3f4e] rounded-lg text-sm font-medium transition-colors"
+                >
+                  Create Campaign
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/create/map")}
+                  className="w-full py-2.5 px-4 bg-[#2a2f3e] hover:bg-[#3a3f4e] rounded-lg text-sm font-medium transition-colors"
+                >
+                  Create Map
+                </button>
+              </div>
+
               {/* Style Selection */}
               <div className="w-full">
                 <label className="block mb-2 text-sm font-medium">

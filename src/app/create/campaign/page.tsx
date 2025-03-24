@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import CampaignManager from "./CampaignManager";
+import { useRouter } from "next/navigation";
 
 export default function CreateCampaign() {
   const { username } = useLogin();
@@ -11,6 +12,7 @@ export default function CreateCampaign() {
   >([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
+  const router = useRouter();
 
   const [campaignData, setCampaignData] = useState({
     name: "",
@@ -131,6 +133,24 @@ export default function CreateCampaign() {
           <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 lg:gap-8">
             {/* Left Sidebar - Campaigns List */}
             <div className="space-y-4">
+              {/* Navigation Buttons */}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/create/map")}
+                  className="w-full py-2.5 px-4 bg-[#2a2f3e] hover:bg-[#3a3f4e] rounded-lg text-sm font-medium transition-colors"
+                >
+                  Create Map
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/create/character")}
+                  className="w-full py-2.5 px-4 bg-[#2a2f3e] hover:bg-[#3a3f4e] rounded-lg text-sm font-medium transition-colors"
+                >
+                  Create Character
+                </button>
+              </div>
+
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium">Your Campaigns</h2>
                 <button
