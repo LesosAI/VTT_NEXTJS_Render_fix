@@ -17,7 +17,19 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "ForgeLab",
-  description: "ForgeLab is a platform for creating and sharing digital art and campaigns for tabletop RPGs.",
+  description:
+    "ForgeLab is a platform for creating and sharing digital art and campaigns for tabletop RPGs.",
+  icons: {
+    icon: [
+      { url: "/forgelabiconblack.png", sizes: "32x32", type: "image/png" },
+      { url: "/forgelabiconblack.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: {
+      url: "/forgelabiconblack.png",
+      sizes: "180x180",
+      type: "image/png",
+    },
+  },
 };
 
 export default function RootLayout({
