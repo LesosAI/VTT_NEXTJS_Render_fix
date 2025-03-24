@@ -227,8 +227,7 @@ export default function CreateMap() {
               {mapHistory.map((map) => (
                 <div
                   key={map.id}
-                  className="bg-[#2a2f3e] rounded-lg overflow-hidden cursor-pointer hover:bg-[#3a3f4e] transition-colors"
-                  onClick={() => router.push(`/map/${map.id}`)}
+                  className="bg-[#2a2f3e] rounded-lg overflow-hidden"
                 >
                   <img
                     src={map.image_url}
@@ -245,6 +244,12 @@ export default function CreateMap() {
                     <p className="text-xs text-gray-500 mt-2">
                       {new Date(map.created_at).toLocaleDateString()}
                     </p>
+                    <button
+                      onClick={() => window.open(map.image_url, "_blank")}
+                      className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium"
+                    >
+                      Download Map
+                    </button>
                   </div>
                 </div>
               ))}
