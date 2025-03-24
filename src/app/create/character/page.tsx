@@ -169,9 +169,11 @@ export default function CreateCharacter() {
                   className="w-full h-1 bg-[#2a2f3e] rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-sm text-gray-400 mt-1.5">
-                  {characterData.imageShape < 50
-                    ? "Square (1:1)"
-                    : "Rectangle (4:3)"}
+                  {characterData.imageShape < 33
+                    ? "512×512"
+                    : characterData.imageShape < 66
+                    ? "768×768"
+                    : "1024×1024"}
                 </div>
               </div>
             </div>
