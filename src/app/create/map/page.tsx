@@ -9,7 +9,6 @@ type Map = {
   image_url: string;
   description: string;
   style: string;
-  tone: string;
   created_at: string;
 };
 
@@ -17,7 +16,6 @@ export default function CreateMap() {
   const [mapData, setMapData] = useState({
     description: "",
     style: "fantasy",
-    tone: "realistic",
     imageShape: 50,
   });
 
@@ -63,7 +61,6 @@ export default function CreateMap() {
             username,
             description: mapData.description,
             style: mapData.style,
-            tone: mapData.tone,
           }),
         }
       );
@@ -96,42 +93,35 @@ export default function CreateMap() {
           >
             {/* Left Column - Controls */}
             <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-8">
-              {/* Style Selection */}
+              {/* Style Toggle */}
               <div className="w-full">
                 <label className="block mb-2 text-sm font-medium">
                   Map Style
                 </label>
-                <select
-                  className="w-full p-2.5 bg-[#2a2f3e] rounded-lg text-sm"
-                  value={mapData.style}
-                  onChange={(e) =>
-                    setMapData({ ...mapData, style: e.target.value })
-                  }
-                >
-                  <option value="fantasy">Fantasy</option>
-                  <option value="realistic">Realistic</option>
-                  <option value="sci-fi">Sci-Fi</option>
-                  <option value="vintage">Vintage</option>
-                </select>
-              </div>
-
-              {/* Tone Selection */}
-              <div className="w-full">
-                <label className="block mb-2 text-sm font-medium">
-                  Map Tone
-                </label>
-                <select
-                  className="w-full p-2.5 bg-[#2a2f3e] rounded-lg text-sm"
-                  value={mapData.tone}
-                  onChange={(e) =>
-                    setMapData({ ...mapData, tone: e.target.value })
-                  }
-                >
-                  <option value="realistic">Realistic</option>
-                  <option value="stylized">Stylized</option>
-                  <option value="minimalist">Minimalist</option>
-                  <option value="detailed">Detailed</option>
-                </select>
+                <div className="flex bg-[#2a2f3e] rounded-lg p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMapData({ ...mapData, style: "fantasy" })}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      mapData.style === "fantasy"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    Fantasy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMapData({ ...mapData, style: "sci-fi" })}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      mapData.style === "sci-fi"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    Sci-Fi
+                  </button>
+                </div>
               </div>
 
               {/* Image Shape Slider */}
@@ -247,7 +237,7 @@ export default function CreateMap() {
                   />
                   <div className="p-3 sm:p-4">
                     <p className="text-sm text-gray-300 mb-2">
-                      Style: {map.style} | Tone: {map.tone}
+                      Style: {map.style}
                     </p>
                     <p className="text-sm text-gray-400 line-clamp-2">
                       {map.description}
