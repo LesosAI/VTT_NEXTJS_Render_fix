@@ -24,7 +24,15 @@ export default function HeroSection() {
       <div className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="w-24"></div>
+            <div className="w-[180px]">
+              <NextImage
+                src="/ForgeLabsLogo.png"
+                alt="ForgeLab Logo"
+                width={340}
+                height={340}
+                className="object-contain"
+              />
+            </div>
 
             <nav
               className={`${
