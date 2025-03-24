@@ -144,10 +144,10 @@ const PRICING_PLANS: Plan[] = [
   {
     title: "Game Master",
     description: "Full access to all generation features",
-    yearlyPrice: 108.0,
-    monthlyPrice: 9.0,
-    yearlyPriceId: "price_1QijlK02khdf3R0AMM6ohbah",
-    monthlyPriceId: "price_1QijlK02khdf3R0AN2aXLQJP",
+    yearlyPrice: 120.0,
+    monthlyPrice: 12.0,
+    yearlyPriceId: "price_1R64E502khdf3R0AbLwQdeAA",
+    monthlyPriceId: "price_1R64E502khdf3R0A1tvUHNbt",
     color: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white",
     features: [
       { text: "Generate character art", included: true },

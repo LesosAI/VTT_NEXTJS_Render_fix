@@ -35,8 +35,8 @@ export default function Plans() {
   }, [username]);
 
   const STRIPE_PRICE_IDS = {
-    "Game Master Monthly": "price_1QijlK02khdf3R0AN2aXLQJP",
-    "Game Master Yearly": "price_1QijlK02khdf3R0AMM6ohbah",
+    "Game Master Monthly": "price_1R64E502khdf3R0A1tvUHNbt",
+    "Game Master Yearly": "price_1R64E502khdf3R0AbLwQdeAA",
   } as const;
 
   type StripePlanName = keyof typeof STRIPE_PRICE_IDS;
@@ -127,8 +127,8 @@ export default function Plans() {
     },
     {
       name: "Game Master",
-      price: isAnnual ? "$90.00" : "$9.00",
-      period: isAnnual ? "/ year" : "/ month",
+      price: isAnnual ? "$120.00" : "$12.00",
+      period: isAnnual ? "/ year" : "/ month", 
       description: `Ideal for game masters that need to generate campaigns. ${
         isAnnual ? "Save 17% with annual billing!" : ""
       }`,
