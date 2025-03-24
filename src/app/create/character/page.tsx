@@ -9,7 +9,6 @@ type Character = {
   image_url: string;
   description: string;
   style: string;
-  gender: string;
   created_at: string;
   tags: string[];
 };
@@ -17,12 +16,9 @@ type Character = {
 export default function CreateCharacter() {
   const [characterData, setCharacterData] = useState({
     description: "",
-    style: "realistic",
-    gender: "neutral",
+    style: "fantasy",
     imageShape: 50,
-    tags: [] as string[],
   });
-  const [newTag, setNewTag] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const [generatedImage, setGeneratedImage] = useState("");
@@ -51,24 +47,6 @@ export default function CreateCharacter() {
     }
   }, [username]);
 
-  const handleAddTag = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTag.trim() && !characterData.tags.includes(newTag.trim())) {
-      setCharacterData({
-        ...characterData,
-        tags: [...characterData.tags, newTag.trim()],
-      });
-      setNewTag("");
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setCharacterData({
-      ...characterData,
-      tags: characterData.tags.filter((tag) => tag !== tagToRemove),
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
@@ -85,8 +63,6 @@ export default function CreateCharacter() {
             username,
             description: characterData.description,
             style: characterData.style,
-            gender: characterData.gender,
-            tags: characterData.tags,
           }),
         }
       );
@@ -144,48 +120,40 @@ export default function CreateCharacter() {
                 <label className="block mb-2 text-sm font-medium">
                   Character Style
                 </label>
-                <select
-                  className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                  value={characterData.style}
-                  onChange={(e) =>
-                    setCharacterData({
-                      ...characterData,
-                      style: e.target.value,
-                    })
-                  }
-                >
-                  <option value="realistic">Realistic</option>
-                  <option value="anime">Anime</option>
-                  <option value="cartoon">Cartoon</option>
-                  <option value="stylized">Stylized</option>
-                </select>
-              </div>
-
-              {/* Gender Selection */}
-              <div className="w-full">
-                <label className="block mb-2 text-sm font-medium">
-                  Character Gender
-                </label>
-                <select
-                  className="w-full p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                  value={characterData.gender}
-                  onChange={(e) =>
-                    setCharacterData({
-                      ...characterData,
-                      gender: e.target.value,
-                    })
-                  }
-                >
-                  <option value="neutral">Neutral</option>
-                  <option value="masculine">Masculine</option>
-                  <option value="feminine">Feminine</option>
-                </select>
+                <div className="flex bg-[#2a2f3e] rounded-lg p-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCharacterData({ ...characterData, style: "fantasy" })
+                    }
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      characterData.style === "fantasy"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    Fantasy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCharacterData({ ...characterData, style: "sci-fi" })
+                    }
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      characterData.style === "sci-fi"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    Sci-Fi
+                  </button>
+                </div>
               </div>
 
               {/* Image Shape Slider */}
               <div className="w-full">
                 <label className="block mb-2 text-sm font-medium">
-                  Image Shape (Portrait to Full Body)
+                  Image Resolution
                 </label>
                 <input
                   type="range"
@@ -201,47 +169,10 @@ export default function CreateCharacter() {
                   className="w-full h-1 bg-[#2a2f3e] rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-sm text-gray-400 mt-1.5">
-                  {characterData.imageShape < 50 ? "Portrait" : "Full Body"}
+                  {characterData.imageShape < 50
+                    ? "Square (1:1)"
+                    : "Rectangle (4:3)"}
                 </div>
-              </div>
-
-              {/* Add Tags Section */}
-              <div className="w-full">
-                <label className="block mb-2 text-sm font-medium">Tags</label>
-                <div className="flex gap-2 flex-wrap mb-2">
-                  {characterData.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="bg-blue-600 px-2 py-1 rounded-full text-sm flex items-center gap-1"
-                    >
-                      {tag}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemoveTag(tag);
-                        }}
-                        className="hover:text-red-300"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <form onSubmit={handleAddTag} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    className="flex-1 p-2 bg-[#2a2f3e] rounded-lg text-sm"
-                    placeholder="Add a tag..."
-                  />
-                  <button
-                    type="submit"
-                    className="px-3 py-1 bg-blue-600 rounded-lg hover:bg-blue-700"
-                  >
-                    Add
-                  </button>
-                </form>
               </div>
             </div>
 
@@ -335,23 +266,11 @@ export default function CreateCharacter() {
                   />
                   <div className="p-4">
                     <p className="text-sm text-gray-300 mb-2">
-                      Style: {character.style} | Gender: {character.gender}
+                      Style: {character.style}
                     </p>
                     <p className="text-sm text-gray-400">
                       {character.description}
                     </p>
-                    {character.tags && character.tags.length > 0 && (
-                      <div className="mt-2 flex gap-2 flex-wrap">
-                        {character.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="bg-blue-600 px-2 py-1 rounded-full text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                     <p className="text-xs text-gray-500 mt-2">
                       {new Date(character.created_at).toLocaleDateString()}
                     </p>
