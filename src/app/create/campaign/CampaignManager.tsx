@@ -223,6 +223,34 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
               <option value="underwater">Underwater</option>
             </select>
           </div>
+
+          {/* Previous Content Selection */}
+          <div className="col-span-3">
+            <label className="block mb-2 text-sm font-medium">
+              Previous Campaign Content
+            </label>
+            <select
+              className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+              onChange={(e) => {
+                const selectedContent = contents.find(
+                  (c) => c.id === parseInt(e.target.value)
+                );
+                if (selectedContent) {
+                  setNewContent({
+                    ...newContent,
+                    description: `Reference to previous content: ${selectedContent.description}\n${newContent.description}`,
+                  });
+                }
+              }}
+            >
+              <option value="">Select previous content to reference...</option>
+              {contents.map((content) => (
+                <option key={content.id} value={content.id}>
+                  {content.description.substring(0, 100)}...
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="mb-4">
