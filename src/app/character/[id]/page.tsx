@@ -9,7 +9,6 @@ type Character = {
   image_url: string;
   description: string;
   style: string;
-  gender: string;
   created_at: string;
   tags: string[];
 };
@@ -246,10 +245,6 @@ export default function CharacterDetails() {
                   <p className="text-lg mb-2">
                     Style:{" "}
                     <span className="text-gray-300">{character.style}</span>
-                  </p>
-                  <p className="text-lg mb-4">
-                    Gender:{" "}
-                    <span className="text-gray-300">{character.gender}</span>
                   </p>
                   <p className="text-gray-400">{character.description}</p>
                 </div>
