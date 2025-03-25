@@ -28,6 +28,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   });
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedContents, setSelectedContents] = useState<Content[]>([]);
 
   const presetPrompts = [
     {
@@ -164,6 +165,19 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
     });
   };
 
+  const handleRemoveSelectedContent = (contentToRemove: Content) => {
+    setSelectedContents(
+      selectedContents.filter((c) => c.id !== contentToRemove.id)
+    );
+    setNewContent({
+      ...newContent,
+      description: newContent.description.replace(
+        `Reference to previous content: ${contentToRemove.description}\n`,
+        ""
+      ),
+    });
+  };
+
   return (
     <div className="bg-[#2a2f3e] rounded-lg p-6">
       <h2 className="text-xl font-bold mb-6">Campaign Content</h2>
@@ -231,25 +245,70 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
             </label>
             <select
               className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+              value=""
               onChange={(e) => {
-                const selectedContent = contents.find(
+                const content = contents.find(
                   (c) => c.id === parseInt(e.target.value)
                 );
-                if (selectedContent) {
+                if (
+                  content &&
+                  !selectedContents.some((sc) => sc.id === content.id)
+                ) {
+                  setSelectedContents([...selectedContents, content]);
                   setNewContent({
                     ...newContent,
-                    description: `Reference to previous content: ${selectedContent.description}\n${newContent.description}`,
+                    description: `Reference to previous content: ${content.description}\n${newContent.description}`,
                   });
                 }
               }}
             >
               <option value="">Select previous content to reference...</option>
-              {contents.map((content) => (
-                <option key={content.id} value={content.id}>
-                  {content.description.substring(0, 100)}...
-                </option>
-              ))}
+              {contents
+                .filter(
+                  (content) =>
+                    !selectedContents.some((sc) => sc.id === content.id)
+                )
+                .map((content) => (
+                  <option key={content.id} value={content.id}>
+                    {content.description.substring(0, 100)}...
+                  </option>
+                ))}
             </select>
+
+            {/* Selected Content Tags */}
+            {selectedContents.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {selectedContents.map((content) => (
+                  <span
+                    key={content.id}
+                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[#1a1f2e] hover:bg-[#3a3f4e] rounded-full text-gray-300"
+                  >
+                    {content.description.substring(0, 50)}...
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSelectedContent(content)}
+                      className="ml-2 text-gray-400 hover:text-red-400"
+                      title="Remove reference"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
