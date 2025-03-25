@@ -78,6 +78,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           body: JSON.stringify({
             username,
             ...newContent,
+            selectedContentIds: selectedContents.map((content) => content.id),
           }),
         }
       );
@@ -89,6 +90,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           tone: "serious",
           setting: "medieval",
         });
+        setSelectedContents([]);
         fetchContents();
       }
     } catch (error) {
@@ -241,7 +243,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           {/* Previous Content Selection */}
           <div className="col-span-3">
             <label className="block mb-2 text-sm font-medium">
-              Previous Campaign Content
+              Campaign Context
             </label>
             <select
               className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
@@ -255,10 +257,6 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
                   !selectedContents.some((sc) => sc.id === content.id)
                 ) {
                   setSelectedContents([...selectedContents, content]);
-                  setNewContent({
-                    ...newContent,
-                    description: `Reference to previous content: ${content.description}\n${newContent.description}`,
-                  });
                 }
               }}
             >
@@ -286,7 +284,11 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
                     {content.description.substring(0, 50)}...
                     <button
                       type="button"
-                      onClick={() => handleRemoveSelectedContent(content)}
+                      onClick={() => {
+                        setSelectedContents(
+                          selectedContents.filter((c) => c.id !== content.id)
+                        );
+                      }}
                       className="ml-2 text-gray-400 hover:text-red-400"
                       title="Remove reference"
                     >
