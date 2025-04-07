@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLogin } from "@/context/LoginContext";
 
 interface CampaignManagerProps {
@@ -29,6 +29,10 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedContents, setSelectedContents] = useState<Content[]>([]);
+  const [chattingContentId, setChattingContentId] = useState<Number | null>(null);
+  const [chatInput, setChatInput] = useState('');
+  const chatInputRef = useRef<HTMLInputElement | null>(null);
+
 
   const presetPrompts = [
     {
@@ -44,6 +48,17 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
       text: "Help me add more detail and depth to my existing campaign, including side quests, locations, and world building elements.",
     },
   ];
+
+  useEffect(() => {
+    if (chattingContentId && chatInputRef.current) {
+      // Small timeout ensures the element is rendered before scroll
+      setTimeout(() => {
+        chatInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        chatInputRef.current?.focus();
+      }, 100);
+    }
+  }, [chattingContentId]);
+
 
   useEffect(() => {
     fetchContents();
@@ -180,6 +195,17 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
     });
   };
 
+  const handleSendChat = async (contentId: number) => {
+    if (!chatInput.trim()) return;
+
+    // Example API call or logic
+    console.log(`Sending to AI: ${chatInput} for content #${contentId}`);
+
+    // Clear input
+    setChatInput('');
+  };
+
+
   return (
     <div className="bg-[#2a2f3e] rounded-lg p-6">
       <h2 className="text-xl font-bold mb-6">Campaign Content</h2>
@@ -314,7 +340,22 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           </div>
         </div>
 
-        <div className="mb-4">
+        <div>
+          <label className="block mb-2 text-sm font-medium">Choose Category</label>
+          <select
+            className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+            value={newContent.setting}
+            onChange={(e) =>
+              setNewContent({ ...newContent, setting: e.target.value })
+            }
+          >
+            <option value="Settings">Settings</option>
+            <option value="Character">Character</option>
+            <option value="Story">Story</option>
+          </select>
+        </div>
+
+        <div className=" mt-2 mb-4">
           <label className="block mb-2 text-sm font-medium">
             Content Description
           </label>
@@ -352,11 +393,10 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
         <button
           type="submit"
           disabled={!newContent.description.trim() || isGenerating}
-          className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
-            !newContent.description.trim() || isGenerating
-              ? "bg-gray-600 cursor-not-allowed opacity-50"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
+          className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${!newContent.description.trim() || isGenerating
+            ? "bg-gray-600 cursor-not-allowed opacity-50"
+            : "bg-blue-600 hover:bg-blue-700"
+            }`}
         >
           {isGenerating ? (
             <>
@@ -467,6 +507,28 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
                   </div>
                   <div className="flex gap-2">
                     <button
+                      onClick={() => setChattingContentId(content.id)}
+                      className="p-1 text-gray-400 hover:text-green-400"
+                      title="Chat"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 8h10M7 12h6m5 8l-4-4H6a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2z"
+                        />
+                      </svg>
+
+                    </button>
+
+                    <button
                       onClick={() => startEditing(content)}
                       className="p-1 text-gray-400 hover:text-white"
                       title="Edit"
@@ -512,6 +574,31 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
                   {content.description}
                 </p>
                 <p className="whitespace-pre-wrap">{content.content}</p>
+                {chattingContentId === content.id && (
+                  <div className="mt-4 border-t border-gray-700 pt-4">
+                    <label className="block mb-2 text-sm font-medium text-gray-400">
+                      Chat with AI about this section
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        ref={chatInputRef}
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        className="flex-grow p-2 rounded bg-[#2a2f3e] text-sm"
+                        placeholder="Ask AI about this content..."
+                      />
+
+                      <button
+                        onClick={() => handleSendChat(content.id)}
+                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium"
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-xs text-gray-500 mt-2">
                   Created: {new Date(content.created_at).toLocaleString()}
                 </p>
