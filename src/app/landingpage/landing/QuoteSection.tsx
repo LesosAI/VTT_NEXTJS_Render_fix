@@ -22,7 +22,7 @@ const QuoteSection = () => {
             </h6>
             <p className="text-sm text-black">
               <a
-                href="/signup"
+                href="/register"
                 className="hover:text-[#e90026] transition-colors"
               >
                 Create Your Account

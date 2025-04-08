@@ -112,7 +112,7 @@ export default function HeroSection() {
               Get Started
             </a>
             <a
-              href="/signin"
+              href="/login"
               className="w-full sm:w-auto px-10 py-4 rounded-full border border-white/30 text-white hover:bg-white/10 transition-colors text-xl font-medium"
             >
               Sign In
