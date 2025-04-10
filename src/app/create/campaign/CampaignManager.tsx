@@ -23,7 +23,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [newContent, setNewContent] = useState({
     description: "",
-    content_category: "settings",
+    content_category: "world building",
     genre: "fantasy",
     tone: "serious",
     setting: "medieval",
@@ -34,8 +34,8 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const [chattingContentId, setChattingContentId] = useState<Number | null>(null);
   const [promptInput, setPromptInput] = useState('');
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const tabs: ('settings' | 'character' | 'story')[] = ['settings', 'character', 'story'];
-  const [activeTab, setActiveTab] = useState<'settings' | 'character' | 'story'>('settings');
+  const tabs: ('world building' | 'character' | 'story')[] = ['world building', 'character', 'story'];
+  const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story'>('world building');
   const [regeneratingContentId, setRegeneratingContentId] = useState<number | null>(null);
 
 
@@ -107,7 +107,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
       if (response.ok) {
         setNewContent({
           description: "",
-          content_category: "settings",
+          content_category: "world building",
           genre: "fantasy",
           tone: "serious",
           setting: "medieval",
@@ -388,7 +388,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
               setNewContent({ ...newContent, content_category: e.target.value })
             }
           >
-            <option value="Settings">Settings</option>
+            <option value="World Building">World Building</option>
             <option value="Character">Character</option>
             <option value="Story">Story</option>
           </select>
