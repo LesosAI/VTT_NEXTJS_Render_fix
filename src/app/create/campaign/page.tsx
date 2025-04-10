@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 export default function CreateCampaign() {
   const { username } = useLogin();
   const [campaigns, setCampaigns] = useState<
-    Array<{ id: string; name: string }>
+    Array<{ id: string; name: string; genre: string; tone: string; setting: string }>
   >([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
@@ -16,6 +16,9 @@ export default function CreateCampaign() {
 
   const [campaignData, setCampaignData] = useState({
     name: "",
+    genre: "fantasy",
+    tone: "serious",
+    setting: "medieval",
   });
 
   const [generatedText, setGeneratedText] = useState("");
@@ -75,7 +78,7 @@ export default function CreateCampaign() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              name: campaignData.name,
+              ...campaignData,
               username: username,
             }),
           }
@@ -105,14 +108,20 @@ export default function CreateCampaign() {
   const resetCampaignData = () => {
     setCampaignData({
       name: "",
+      genre: "fantasy",
+      tone: "serious",
+      setting: "medieval",
     });
   };
 
   // Update handleCampaignSelect
-  const handleCampaignSelect = (campaign: { id: string; name: string }) => {
+  const handleCampaignSelect = (campaign: { id: string; name: string; genre: string; tone: string; setting: string }) => {
     setSelectedCampaign(campaign.id);
     setCampaignData({
       name: campaign.name,
+      genre: campaign.genre,
+      tone: campaign.tone,
+      setting: campaign.setting,
     });
   };
 
@@ -121,6 +130,10 @@ export default function CreateCampaign() {
     setSelectedCampaign(null); // Reset selected campaign
     resetCampaignData(); // Reset form data
     setShowNewCampaignModal(true);
+  };
+
+  const handleSave = () => {
+    console.log("Saving campaign:", campaignData);
   };
 
   return (
@@ -179,11 +192,10 @@ export default function CreateCampaign() {
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign.id}
-                    className={`p-3 rounded-lg cursor-pointer ${
-                      selectedCampaign === campaign.id
-                        ? "bg-blue-600"
-                        : "bg-[#2a2f3e] hover:bg-[#3a3f4e]"
-                    }`}
+                    className={`p-3 rounded-lg cursor-pointer ${selectedCampaign === campaign.id
+                      ? "bg-blue-600"
+                      : "bg-[#2a2f3e] hover:bg-[#3a3f4e]"
+                      }`}
                     onClick={() => handleCampaignSelect(campaign)}
                   >
                     <h3 className="font-medium">{campaign.name}</h3>
@@ -195,7 +207,12 @@ export default function CreateCampaign() {
             {/* Right Side - Campaign Description Form */}
             <div className="mt-4 lg:mt-0">
               {selectedCampaign ? (
-                <CampaignManager campaignId={parseInt(selectedCampaign)} />
+                <CampaignManager 
+                  campaignId={parseInt(selectedCampaign)} 
+                  campaignData={campaignData} 
+                  onCampaignDataChange={(updated: Partial<typeof campaignData>) => setCampaignData((prev) => ({ ...prev, ...updated }))}
+                  onUpdate={handleSave}
+                />
               ) : (
                 <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 text-center">
                   <p className="text-gray-400">
@@ -231,6 +248,58 @@ export default function CreateCampaign() {
                   placeholder="Enter campaign name"
                   required
                 />
+                {/* Genre Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Genre</label>
+                  <select
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.genre}
+                    onChange={(e) =>
+                      setCampaignData({ ...campaignData, genre: e.target.value })
+                    }
+                  >
+                    <option value="fantasy">Fantasy</option>
+                    <option value="sci-fi">Science Fiction</option>
+                    <option value="horror">Horror</option>
+                    <option value="modern">Modern</option>
+                    <option value="post-apocalyptic">Post-Apocalyptic</option>
+                  </select>
+                </div>
+
+                {/* Tone Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Tone</label>
+                  <select
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.tone}
+                    onChange={(e) =>
+                      setCampaignData({ ...campaignData, tone: e.target.value })
+                    }
+                  >
+                    <option value="serious">Serious</option>
+                    <option value="lighthearted">Lighthearted</option>
+                    <option value="dark">Dark</option>
+                    <option value="comedic">Comedic</option>
+                  </select>
+                </div>
+
+                {/* Setting Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Setting</label>
+                  <select
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.setting}
+                    onChange={(e) =>
+                      setCampaignData({ ...campaignData, setting: e.target.value })
+                    }
+                  >
+                    <option value="medieval">Medieval</option>
+                    <option value="urban">Urban</option>
+                    <option value="wilderness">Wilderness</option>
+                    <option value="space">Space</option>
+                    <option value="underwater">Underwater</option>
+                  </select>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <button
