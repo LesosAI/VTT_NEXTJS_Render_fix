@@ -1,9 +1,20 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { useLogin } from "@/context/LoginContext";
+import { on } from "events";
+
+interface CampaignData {
+  name: string;
+  genre: string;
+  tone: string;
+  setting: string;
+}
 
 interface CampaignManagerProps {
   campaignId: number;
+  campaignData: CampaignData;
+  onCampaignDataChange: (updated: Partial<CampaignData>) => void;
+  onUpdate: () => void;
 }
 
 interface Content {
@@ -17,16 +28,13 @@ interface Content {
   created_at: string;
 }
 
-export default function CampaignManager({ campaignId }: CampaignManagerProps) {
+export default function CampaignManager({ campaignId, campaignData, onCampaignDataChange, onUpdate }: CampaignManagerProps) {
   const { username } = useLogin();
   const [contents, setContents] = useState<Content[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [newContent, setNewContent] = useState({
     description: "",
     content_category: "world building",
-    genre: "fantasy",
-    tone: "serious",
-    setting: "medieval",
   });
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -37,6 +45,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   const tabs: ('world building' | 'character' | 'story')[] = ['world building', 'character', 'story'];
   const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story'>('world building');
   const [regeneratingContentId, setRegeneratingContentId] = useState<number | null>(null);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
 
 
@@ -98,6 +107,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           },
           body: JSON.stringify({
             username,
+            ...campaignData,
             ...newContent,
             selectedContentIds: selectedContents.map((content) => content.id),
           }),
@@ -108,9 +118,6 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
         setNewContent({
           description: "",
           content_category: "world building",
-          genre: "fantasy",
-          tone: "serious",
-          setting: "medieval",
         });
         setSelectedContents([]);
         fetchContents();
@@ -204,7 +211,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPromptInput(e.target.value);
-  
+
     const textarea = e.target;
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`; // Set to scrollHeight
@@ -224,7 +231,7 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
           },
           body: JSON.stringify({
             username,
-            ...newContent,
+            ...campaignData,
             promptInput
           }),
         }
@@ -245,66 +252,126 @@ export default function CampaignManager({ campaignId }: CampaignManagerProps) {
   };
 
 
+  const setShowSettings = (show: boolean) => {
+    setShowSettingsModal(show);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    onCampaignDataChange({ [name]: value });
+  };
+
   return (
     <div className="bg-[#2a2f3e] rounded-lg p-6">
-      <h2 className="text-xl font-bold mb-6">Campaign Content</h2>
+      <div className="flex justify-between items-start mb-3">
+        <h2 className="text-xl font-bold mb-6">Campaign Content</h2>
+        <button
+          onClick={() => setShowSettings(true)} // Replace with your own handler
+          className="p-1 text-gray-400 hover:text-blue-400"
+          title="Settings"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </button>
+
+      </div>
+
+      {/* New Campaign Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 w-full max-w-[400px]">
+            <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
+            <form>
+              <div className="mb-4">
+                <label className="block mb-2 text-sm font-medium">
+                  Campaign Name
+                </label>
+                <input
+                  name="name"
+                  type="text"
+                  className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                  value={campaignData.name}
+                  onChange={handleChange}
+                  placeholder="Enter campaign name"
+                  required
+                />
+                {/* Genre Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Genre</label>
+                  <select
+                    name="genre"
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.genre}
+                    onChange={handleChange}
+                  >
+                    <option value="fantasy">Fantasy</option>
+                    <option value="sci-fi">Science Fiction</option>
+                    <option value="horror">Horror</option>
+                    <option value="modern">Modern</option>
+                    <option value="post-apocalyptic">Post-Apocalyptic</option>
+                  </select>
+                </div>
+
+                {/* Tone Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Tone</label>
+                  <select
+                    name="tone"
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.tone}
+                    onChange={handleChange}
+                  >
+                    <option value="serious">Serious</option>
+                    <option value="lighthearted">Lighthearted</option>
+                    <option value="dark">Dark</option>
+                    <option value="comedic">Comedic</option>
+                  </select>
+                </div>
+
+                {/* Setting Selection */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Setting</label>
+                  <select
+                    name="setting"  
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.setting}
+                    onChange={handleChange}
+                  >
+                    <option value="medieval">Medieval</option>
+                    <option value="urban">Urban</option>
+                    <option value="wilderness">Wilderness</option>
+                    <option value="space">Space</option>
+                    <option value="underwater">Underwater</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSettingsModal(false)}
+                  className="py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onUpdate}
+                  type="submit"
+                  className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Content Generation Form */}
       <form onSubmit={handleGenerateContent} className="mb-8">
         <div className="grid grid-cols-3 gap-4 mb-4">
-          {/* Genre Selection */}
-          <div>
-            <label className="block mb-2 text-sm font-medium">Genre</label>
-            <select
-              className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-              value={newContent.genre}
-              onChange={(e) =>
-                setNewContent({ ...newContent, genre: e.target.value })
-              }
-            >
-              <option value="fantasy">Fantasy</option>
-              <option value="sci-fi">Science Fiction</option>
-              <option value="horror">Horror</option>
-              <option value="modern">Modern</option>
-              <option value="post-apocalyptic">Post-Apocalyptic</option>
-            </select>
-          </div>
-
-          {/* Tone Selection */}
-          <div>
-            <label className="block mb-2 text-sm font-medium">Tone</label>
-            <select
-              className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-              value={newContent.tone}
-              onChange={(e) =>
-                setNewContent({ ...newContent, tone: e.target.value })
-              }
-            >
-              <option value="serious">Serious</option>
-              <option value="lighthearted">Lighthearted</option>
-              <option value="dark">Dark</option>
-              <option value="comedic">Comedic</option>
-            </select>
-          </div>
-
-          {/* Setting Selection */}
-          <div>
-            <label className="block mb-2 text-sm font-medium">Setting</label>
-            <select
-              className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-              value={newContent.setting}
-              onChange={(e) =>
-                setNewContent({ ...newContent, setting: e.target.value })
-              }
-            >
-              <option value="medieval">Medieval</option>
-              <option value="urban">Urban</option>
-              <option value="wilderness">Wilderness</option>
-              <option value="space">Space</option>
-              <option value="underwater">Underwater</option>
-            </select>
-          </div>
-
+          
           {/* Previous Content Selection */}
           <div className="col-span-3">
             <label className="block mb-2 text-sm font-medium">
