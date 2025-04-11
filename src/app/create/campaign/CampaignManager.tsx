@@ -38,7 +38,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   });
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedContents, setSelectedContents] = useState<Content[]>([]);
+  const [selectedContents, setSelectedContents] = useState<(Content | null)[]>([null, null, null]);
   const [chattingContentId, setChattingContentId] = useState<Number | null>(null);
   const [promptInput, setPromptInput] = useState('');
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -46,6 +46,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story'>('world building');
   const [regeneratingContentId, setRegeneratingContentId] = useState<number | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const categoryMap = ["world building", "character", "story"];
 
 
 
@@ -109,7 +110,9 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
             username,
             ...campaignData,
             ...newContent,
-            selectedContentIds: selectedContents.map((content) => content.id),
+            selectedContentIds: selectedContents
+            .filter((content): content is Content => content !== null)
+            .map((content) => content.id),
           }),
         }
       );
@@ -119,7 +122,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
           description: "",
           content_category: "world building",
         });
-        setSelectedContents([]);
+        setSelectedContents([null, null, null]);
         fetchContents();
       }
     } catch (error) {
@@ -198,7 +201,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
   const handleRemoveSelectedContent = (contentToRemove: Content) => {
     setSelectedContents(
-      selectedContents.filter((c) => c.id !== contentToRemove.id)
+      selectedContents.filter((c) => c?.id !== contentToRemove.id)
     );
     setNewContent({
       ...newContent,
@@ -339,7 +342,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                 <div>
                   <label className="block mb-2 text-sm font-medium">Setting</label>
                   <select
-                    name="setting"  
+                    name="setting"
                     className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
                     value={campaignData.setting}
                     onChange={handleChange}
@@ -375,80 +378,55 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
       {/* Content Generation Form */}
       <form onSubmit={handleGenerateContent} className="mb-8">
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          
-          {/* Previous Content Selection */}
-          <div className="col-span-3">
-            <label className="block mb-2 text-sm font-medium">
-              Campaign Context
-            </label>
-            <select
-              className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-              value=""
-              onChange={(e) => {
-                const content = contents.find(
-                  (c) => c.id === parseInt(e.target.value)
-                );
-                if (
-                  content &&
-                  !selectedContents.some((sc) => sc.id === content.id)
-                ) {
-                  setSelectedContents([...selectedContents, content]);
-                }
-              }}
-            >
-              <option value="">Select previous content to reference...</option>
-              {contents
-                .filter(
-                  (content) =>
-                    !selectedContents.some((sc) => sc.id === content.id)
-                )
-                .map((content) => (
-                  <option key={content.id} value={content.id}>
-                    {content.description.substring(0, 100)}...
-                  </option>
-                ))}
-            </select>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {/* Campaign Context Label */}
+          <label className="col-span-3 block text-sm font-medium">
+            Campaign Context
+          </label>
 
-            {/* Selected Content Tags */}
-            {selectedContents.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {selectedContents.map((content) => (
-                  <span
-                    key={content.id}
-                    className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-[#1a1f2e] hover:bg-[#3a3f4e] rounded-full text-gray-300"
+          {categoryMap.map((category, index) => (
+            <div key={index}>
+              <select
+                className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                value={selectedContents[index]?.id || ""}
+                onChange={(e) => {
+                  const selectedId = parseInt(e.target.value);
+                  const selectedContent = contents.find((c) => c.id === selectedId);
+                  const updatedSelections = [...selectedContents];
+                  updatedSelections[index] = selectedContent || null;
+                  setSelectedContents(updatedSelections);
+                }}
+              >
+                <option className="w-full" value="">Select previous {category} content...</option>
+                {contents
+                  .filter((content) => content.content_category.toLowerCase() === category.toLowerCase())
+                  .map((content) => (
+                    <option key={content.id} value={content.id}>
+                      {content.description.substring(0, 50)}...
+                    </option>
+                  ))}
+              </select>
+
+              {/* Show selected content below the dropdown */}
+              {selectedContents[index] && (
+                <div className="mt-2 text-xs text-gray-300 bg-[#1a1f2e] p-2 rounded-lg">
+                  {selectedContents[index]?.description.substring(0, 80)}...
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedSelections = [...selectedContents];
+                      updatedSelections[index] = null;
+                      setSelectedContents(updatedSelections);
+                    }}
+                    className="ml-2 text-gray-400 hover:text-red-400 float-right"
+                    title="Remove reference"
                   >
-                    {content.description.substring(0, 50)}...
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedContents(
-                          selectedContents.filter((c) => c.id !== content.id)
-                        );
-                      }}
-                      className="ml-2 text-gray-400 hover:text-red-400"
-                      title="Remove reference"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         <div>
