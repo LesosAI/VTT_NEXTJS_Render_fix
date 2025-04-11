@@ -14,7 +14,7 @@ interface CampaignManagerProps {
   campaignId: number;
   campaignData: CampaignData;
   onCampaignDataChange: (updated: Partial<CampaignData>) => void;
-  onUpdate: () => void;
+  onUpdate: (e: React.FormEvent) => void;
 }
 
 interface Content {
@@ -251,6 +251,11 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
     console.log(`Sending to AI: ${promptInput} for content #${contentId} with ${campaignId}`);
   };
 
+  const handleSettingsUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdate(e);
+    setShowSettingsModal(false);
+  };
 
   const setShowSettings = (show: boolean) => {
     setShowSettingsModal(show);
@@ -356,8 +361,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                   Cancel
                 </button>
                 <button
-                  onClick={onUpdate}
-                  type="submit"
+                  onClick={handleSettingsUpdate}
+                  type="button"
                   className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm"
                 >
                   Update
