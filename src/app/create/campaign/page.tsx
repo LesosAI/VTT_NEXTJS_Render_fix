@@ -60,7 +60,7 @@ export default function CreateCampaign() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              name: campaignData.name,
+              ...campaignData,
               username: username,
             }),
           }
@@ -130,10 +130,6 @@ export default function CreateCampaign() {
     setSelectedCampaign(null); // Reset selected campaign
     resetCampaignData(); // Reset form data
     setShowNewCampaignModal(true);
-  };
-
-  const handleSave = () => {
-    console.log("Saving campaign:", campaignData);
   };
 
   return (
@@ -211,7 +207,7 @@ export default function CreateCampaign() {
                   campaignId={parseInt(selectedCampaign)} 
                   campaignData={campaignData} 
                   onCampaignDataChange={(updated: Partial<typeof campaignData>) => setCampaignData((prev) => ({ ...prev, ...updated }))}
-                  onUpdate={handleSave}
+                  onUpdate={handleSubmit}
                 />
               ) : (
                 <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 text-center">
