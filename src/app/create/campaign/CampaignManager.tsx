@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useLogin } from "@/context/LoginContext";
 import { on } from "events";
+import { motion } from "framer-motion";
 
 interface CampaignData {
   name: string;
@@ -336,37 +337,81 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
             </div>
 
             <div className="overflow-y-auto h-[calc(100%-60px)] px-4 py-2 space-y-4">
-
-              {contentHistory.map((entry, index) => {
-                const userMessage = entry.message.find(m => m.role === "user")?.content || "No prompt";
-                const assistantMessage = entry.message.find(m => m.role === "assistant")?.content || "No response";
+              {contentHistory.map((content, index) => {
+                const userMessage = content.message.find(m => m.role === "user")?.content || "No prompt";
+                const assistantMessage = content.message.find(m => m.role === "assistant")?.content || "No response";
 
                 function handleRestore(id: number): void {
                   throw new Error("Function not implemented.");
                 }
 
                 return (
-                  <div
-                    key={entry.id || index}
-                    className="p-4 bg-[#2a2f3e] rounded-lg hover:bg-[#3a3f4e] cursor-pointer transition"
+                  <motion.div
+                    key={content.id || index}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.4 }}
+                    className="p-4 bg-[#2a2f3e] rounded-lg mb-6"
                   >
-                    <p className="text-xs text-gray-400 mb-1">Prompt:</p>
-                    <p className="text-sm text-white mb-2 line-clamp-2">{userMessage}</p>
+                    {/* Chat Messages */}
+                    <div className="flex flex-col gap-4">
+                      {/* Assistant (Left) */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="self-start max-w-[80%] bg-[#3a3f4e] rounded-xl p-3 text-white text-sm whitespace-pre-wrap"
+                      >
+                        {/* Meta Info inside assistant bubble */}
+                        <div className="mb-3 pt-2 text-xs text-gray-400 flex justify-between items-start gap-2">
+                        <div className="flex gap-4 text-xs text-gray-400">
+                          {content.genre && (
+                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                              Genre: {content.genre}
+                            </span>
+                          )}
+                          {content.tone && (
+                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                              Tone: {content.tone}
+                            </span>
+                          )}
+                          {content.setting && (
+                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                              Setting: {content.setting}
+                            </span>
+                          )}
+                          </div>
+                          <button
+                            onClick={() => console.log(content.id)}
+                            className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded font-medium text-sm text-gray-100"
+                            title="Restore"
+                          >
+                            Restore
+                          </button>
+                        </div>
+                        <div className="border-t border-gray-600 mb-2">
+                          {content.message.find((m) => m.role === "assistant")?.content || "No response"}
+                        </div>
+                          <span className="ml-auto text-gray-500">
+                            {new Date(content.created_at).toLocaleString()}
+                          </span>
 
-                    <p className="text-xs text-gray-400 mb-1">Response:</p>
-                    <p className="text-sm text-gray-300 line-clamp-3">{assistantMessage}</p>
+                      </motion.div>
 
-                    {/* Restore Button */}
-                    <button
-                      onClick={() => handleRestore(entry.id)}
-                      className="mt-2 text-xs text-blue-400 hover:underline"
-                    >
-                      Restore this version
-                    </button>
-                  </div>
+                      {/* User (Right) */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="self-end max-w-[80%] bg-[#4f5568] rounded-xl p-3 text-gray-100 text-sm text-right whitespace-pre-wrap"
+                      >
+                        {content.message.find((m) => m.role === "user")?.content || "No prompt"}
+                      </motion.div>
+                    </div>
+                  </motion.div>
                 );
               })}
-
             </div>
           </div>
         </>
