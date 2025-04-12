@@ -129,7 +129,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       if (response.ok) {
         const data = await response.json();
         setContentHistory(data);
-        setShowHistory(true);
+        setShowHistoryModal(true);
       }
     } catch (error) {
       console.error("Error fetching content history:", error);
@@ -197,11 +197,12 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
   const handleEditContent = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!editingContent) return;
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${editingContent.id}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${editingContent.id}/update`,
         {
           method: "PUT",
           headers: {
@@ -223,6 +224,33 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       console.error("Error updating content:", error);
     }
   };
+
+  const handleRestoreContent = async (contentId: number, restoreContentId: number) => {
+    console.log("Restoring content with ID:", contentId);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${contentId}/restore`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            restoreContentId
+          }),
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        fetchContentHistory(data.id);
+        fetchContents();
+        setShowHistoryModal(true);
+      }      
+    } catch (error) {
+      console.error("Error updating content:", error);
+    }
+  }
 
   const startEditing = (content: Content) => {
     setEditingContent(content);
@@ -305,6 +333,10 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const setShowSettings = (show: boolean) => {
     setShowSettingsModal(show);
   };
+  
+  const setShowHistoryModal = (show: boolean) => {
+    setShowHistory(show);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -328,7 +360,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
           >
             <div className="p-4 flex justify-between items-center border-b border-gray-700">
               <h2 className="text-lg font-semibold text-white">Chat History</h2>
-              <button onClick={() => setShowHistory(false)}>
+              <button onClick={() => setShowHistoryModal(false)}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   strokeWidth={1.5} stroke="currentColor" className="size-6 text-white">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -356,12 +388,23 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                   >
                     {/* Chat Messages */}
                     <div className="flex flex-col gap-4">
+
+                      {/* User (Right) */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="self-end max-w-[70%] bg-[#4f5568] rounded-xl m-4 p-3 text-gray-100 text-sm text-right whitespace-pre-wrap"
+                      >
+                        {content.message.find((m) => m.role === "user")?.content || "No prompt"}
+                      </motion.div>
+
                       {/* Assistant (Left) */}
                       <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4 }}
-                        className="self-start max-w-[80%] bg-[#3a3f4e] rounded-xl p-3 text-white text-sm whitespace-pre-wrap"
+                        className="self-start max-w-[75%] bg-[#3a3f4e] rounded-xl m-4 p-3 text-white text-sm whitespace-pre-wrap"
                       >
                         {/* Meta Info inside assistant bubble */}
                         <div className="mb-3 pt-2 text-xs text-gray-400 flex justify-between items-start gap-2">
@@ -383,7 +426,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                           )}
                           </div>
                           <button
-                            onClick={() => console.log(content.id)}
+                            onClick={() => handleRestoreContent(content.content_id, content.id)}
                             className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded font-medium text-sm text-gray-100"
                             title="Restore"
                           >
@@ -396,17 +439,6 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                           <span className="ml-auto text-gray-500">
                             {new Date(content.created_at).toLocaleString()}
                           </span>
-
-                      </motion.div>
-
-                      {/* User (Right) */}
-                      <motion.div
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="self-end max-w-[80%] bg-[#4f5568] rounded-xl p-3 text-gray-100 text-sm text-right whitespace-pre-wrap"
-                      >
-                        {content.message.find((m) => m.role === "user")?.content || "No prompt"}
                       </motion.div>
                     </div>
                   </motion.div>
