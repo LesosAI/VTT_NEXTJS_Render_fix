@@ -71,6 +71,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
   const promptBoxRef = useRef<HTMLDivElement>(null);
+  const allowedRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -115,25 +116,33 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   useEffect(() => {
     const handleMouseUp = () => {
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const selected = selection.toString();
-        if (selected.trim().length > 0) {
-          const range = selection.getRangeAt(0);
-          setSelectionRange(range);
-          setSelectedText(selected);
-
-          const rect = range.getBoundingClientRect();
-          setToolbarPos({
-            top: rect.top + window.scrollY - 40,
-            left: rect.left + window.scrollX,
-          });
-        }
+      if (!selection || selection.rangeCount === 0) return;
+  
+      const range = selection.getRangeAt(0);
+      const selected = selection.toString().trim();
+      if (selected.length === 0) return;
+  
+      const container = allowedRef.current;
+      if (!container || !container.contains(range.commonAncestorContainer)) {
+        // Selection was outside the allowed area
+        return;
       }
+  
+      // Selection is inside the allowed area
+      setSelectionRange(range);
+      setSelectedText(selected);
+  
+      const rect = range.getBoundingClientRect();
+      setToolbarPos({
+        top: rect.top + window.scrollY - 40,
+        left: rect.left + window.scrollX,
+      });
     };
-
+  
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
+  
 
   useEffect(() => {
     if (toolbarPos && selectionRange) {
@@ -354,7 +363,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/regenerate/${contentId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/regenerate/${contentId}/fully`,
         {
           method: "POST",
           headers: {
@@ -401,8 +410,39 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
     onCampaignDataChange({ [name]: value });
   };
 
-  const handleRegenerate = () => {
-    throw new Error("Function not implemented.");
+  const handleRegenerate = async (contentId: number) => {
+    if (!promptInput.trim()) return;
+    setRegeneratingContentId(contentId);
+    setToolbarPos(null);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/regenerate/${contentId}/partially`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            ...campaignData,
+            promptInput,
+            selectedText
+          }),
+        }
+      );
+
+      if (response.ok) {
+        fetchContents();
+      }
+    } catch (error) {
+      console.error("Error regenerating content:", error);
+    } finally {
+      setSelectedText("");
+      setPromptInput("");
+      setSelectionRange(null);
+      setRegeneratingContentId(null);
+    }
   }
 
   return (
@@ -862,7 +902,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                             Cancel
                           </button>
                           <button
-                            onClick={() => { console.log(promptInput, selectedText); }}
+                            onClick={() => handleRegenerate(content.id)}
                             className="text-sm px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
                           >
                             Regenerate
@@ -976,7 +1016,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                         Regenerating content...
                       </div>
                     ) : (
-                      <p className="whitespace-pre-wrap">{content.content}</p>
+                      <p ref={allowedRef} className="whitespace-pre-wrap">{content.content}</p>
                     )}
 
                     {chattingContentId === content.id && (
