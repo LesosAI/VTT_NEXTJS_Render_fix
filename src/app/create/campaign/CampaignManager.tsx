@@ -67,6 +67,11 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const categoryMap = ["world building", "character", "story"];
   const [showHistory, setShowHistory] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [selectionRange, setSelectionRange] = useState<Range | null>(null);
+  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+  const promptBoxRef = useRef<HTMLDivElement>(null);
+
 
 
   const presetPrompts = [
@@ -106,6 +111,59 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       document.body.classList.remove("overflow-hidden");
     }
   }, [showHistory]);
+
+  useEffect(() => {
+    const handleMouseUp = () => {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const selected = selection.toString();
+        if (selected.trim().length > 0) {
+          const range = selection.getRangeAt(0);
+          setSelectionRange(range);
+          setSelectedText(selected);
+
+          const rect = range.getBoundingClientRect();
+          setToolbarPos({
+            top: rect.top + window.scrollY - 40,
+            left: rect.left + window.scrollX,
+          });
+        }
+      }
+    };
+
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => document.removeEventListener("mouseup", handleMouseUp);
+  }, []);
+
+  useEffect(() => {
+    if (toolbarPos && selectionRange) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(selectionRange);
+      }
+    }
+  }, [toolbarPos, selectionRange]);
+
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        promptBoxRef.current &&
+        !promptBoxRef.current.contains(e.target as Node)
+      ) {
+        setSelectedText("");
+        setToolbarPos(null);
+        setPromptInput("");
+        setSelectionRange(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
 
   const fetchContents = async () => {
     try {
@@ -246,7 +304,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
         fetchContentHistory(data.id);
         fetchContents();
         setShowHistoryModal(true);
-      }      
+      }
     } catch (error) {
       console.error("Error updating content:", error);
     }
@@ -333,7 +391,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const setShowSettings = (show: boolean) => {
     setShowSettingsModal(show);
   };
-  
+
   const setShowHistoryModal = (show: boolean) => {
     setShowHistory(show);
   };
@@ -342,6 +400,10 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
     const { name, value } = e.target;
     onCampaignDataChange({ [name]: value });
   };
+
+  const handleRegenerate = () => {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <>
@@ -370,12 +432,6 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
             <div className="overflow-y-auto h-[calc(100%-60px)] px-4 py-2 space-y-4">
               {contentHistory.map((content, index) => {
-                const userMessage = content.message.find(m => m.role === "user")?.content || "No prompt";
-                const assistantMessage = content.message.find(m => m.role === "assistant")?.content || "No response";
-
-                function handleRestore(id: number): void {
-                  throw new Error("Function not implemented.");
-                }
 
                 return (
                   <motion.div
@@ -408,22 +464,22 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                       >
                         {/* Meta Info inside assistant bubble */}
                         <div className="mb-3 pt-2 text-xs text-gray-400 flex justify-between items-start gap-2">
-                        <div className="flex gap-4 text-xs text-gray-400">
-                          {content.genre && (
-                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                              Genre: {content.genre}
-                            </span>
-                          )}
-                          {content.tone && (
-                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                              Tone: {content.tone}
-                            </span>
-                          )}
-                          {content.setting && (
-                            <span className="px-2 py-1 bg-[#2a2f3e] rounded">
-                              Setting: {content.setting}
-                            </span>
-                          )}
+                          <div className="flex gap-4 text-xs text-gray-400">
+                            {content.genre && (
+                              <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                                Genre: {content.genre}
+                              </span>
+                            )}
+                            {content.tone && (
+                              <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                                Tone: {content.tone}
+                              </span>
+                            )}
+                            {content.setting && (
+                              <span className="px-2 py-1 bg-[#2a2f3e] rounded">
+                                Setting: {content.setting}
+                              </span>
+                            )}
                           </div>
                           <button
                             onClick={() => handleRestoreContent(content.content_id, content.id)}
@@ -436,9 +492,9 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                         <div className="border-t border-gray-600 mb-2">
                           {content.message.find((m) => m.role === "assistant")?.content || "No response"}
                         </div>
-                          <span className="ml-auto text-gray-500">
-                            {new Date(content.created_at).toLocaleString()}
-                          </span>
+                        <span className="ml-auto text-gray-500">
+                          {new Date(content.created_at).toLocaleString()}
+                        </span>
                       </motion.div>
                     </div>
                   </motion.div>
@@ -778,6 +834,43 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                   </form>
                 ) : (
                   <>
+                    {/* Floating toolbar like Canvas */}
+                    {toolbarPos && (
+                      <div
+                        ref={promptBoxRef}
+                        className="absolute bg-[#2a2f3e] border shadow-md p-3 rounded-md w-96"
+                        style={{ top: toolbarPos.top, left: toolbarPos.left, zIndex: 10 }}
+                      >
+                        <textarea
+                          className="w-full bg-[#1a1f2e] border rounded p-2 text-sm"
+                          rows={2}
+                          placeholder="Enter how you want to change the selected text..."
+                          value={promptInput}
+                          onChange={(e) => setPromptInput(e.target.value)}
+                          autoFocus
+                        />
+                        <div className="flex justify-end mt-2 gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedText("");
+                              setToolbarPos(null);
+                              setPromptInput("");
+                              setSelectionRange(null);
+                            }}
+                            className="text-sm px-2 py-1 rounded bg-gray-600 hover:bg-gray-700"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => { console.log(promptInput, selectedText); }}
+                            className="text-sm px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                          >
+                            Regenerate
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-4 text-xs text-gray-400">
                         {content.genre && (
