@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', 'avif']
+
+function isImageRequest(path: string) {
+  return imageExtensions.some(ext => path.toLowerCase().endsWith(ext))
+}
+
 const publicPages = [
   '/register',
   '/login',
@@ -19,6 +25,10 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = request.cookies.get('isLoggedIn')?.value === 'true'
   const username = request.cookies.get('username')?.value
   const path = request.nextUrl.pathname;
+
+  if (isImageRequest(path)) {
+    return NextResponse.next()
+  }
   
   // Check if user is trying to access a protected page without being logged in
   if (!isLoggedIn && !publicPages.includes(path)) {
