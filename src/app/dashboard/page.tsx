@@ -11,6 +11,7 @@ import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
+import Skeleton from 'react-loading-skeleton';
 
 interface Character {
   id: number;
@@ -266,17 +267,63 @@ export default function Dashboard() {
 
           <div className="space-y-12">
             {loading ? (
-              <p className="text-white text-lg">Loading...</p>
+              <>
+                {/* Skeleton Loader for Characters */}
+                <section>
+                  <h2 className="text-2xl font-semibold text-white mb-4">
+                    <Skeleton width={200} />
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array(6)
+                      .fill(0)
+                      .map((_, index) => (
+                        <div
+                          key={`skeleton-character-${index}`}
+                          className="bg-[#2a2f3e] rounded-lg overflow-hidden cursor-pointer"
+                        >
+                          <div className="aspect-video bg-[#3a3f4e] flex items-center justify-center relative">
+                            <Skeleton width="100%" height="100%" />
+                          </div>
+                          <div className="p-4">
+                            <Skeleton width="150px" />
+                            <Skeleton width="100px" />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </section>
+
+                {/* Skeleton Loader for Maps */}
+                <section>
+                  <h2 className="text-2xl font-semibold text-white mb-4">
+                    <Skeleton width={200} />
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array(6)
+                      .fill(0)
+                      .map((_, index) => (
+                        <div
+                          key={`skeleton-map-${index}`}
+                          className="bg-[#2a2f3e] rounded-lg cursor-pointer overflow-hidden"
+                        >
+                          <Skeleton width="100%" height="200px" />
+                          <div className="p-3 sm:p-4">
+                            <Skeleton width="100px" />
+                            <Skeleton width="100%" />
+                            <Skeleton width="80px" />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </section>
+              </>
             ) : (
               <>
-                {/* Character Section */}
-                <section>
-                  <h2 className="text-2xl font-semibold text-white mb-4">Characters</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredAndSortedItems.filter((item) => item.type === "character").length === 0 ? (
-                      <p>No characters found</p>
-                    ) : (
-                      filteredAndSortedItems
+                {filteredAndSortedItems.filter((item) => item.type === "character").length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-semibold text-white mb-4">Characters</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredAndSortedItems
                         .filter((item) => item.type === "character")
                         .map((item) => (
                           <div
@@ -305,19 +352,16 @@ export default function Dashboard() {
                               </p>
                             </div>
                           </div>
-                        ))
-                    )}
-                  </div>
-                </section>
+                        ))}
+                    </div>
+                  </section>
+                )}
 
-                {/* Map Section */}
-                <section>
-                  <h2 className="text-2xl font-semibold text-white mb-4">Maps</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredAndSortedItems.filter((item) => item.type === "map").length === 0 ? (
-                      <p>No maps found</p>
-                    ) : (
-                      filteredAndSortedItems
+                {filteredAndSortedItems.filter((item) => item.type === "map").length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-semibold text-white mb-4">Maps</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredAndSortedItems
                         .filter((item) => item.type === "map")
                         .map((map) => (
                           <div
@@ -345,10 +389,15 @@ export default function Dashboard() {
                               </button>
                             </div>
                           </div>
-                        ))
-                    )}
-                  </div>
-                </section>
+                        ))}
+                    </div>
+                  </section>
+                )}
+
+                {filteredAndSortedItems.filter((item) => item.type === "character" || item.type === "map")
+                  .length === 0 && (
+                    <p className="text-white text-lg text-center">No items found</p>
+                  )}
               </>
             )}
           </div>
