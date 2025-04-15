@@ -10,11 +10,13 @@ import {
 import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
+import { useRouter } from "next/navigation";
 
 interface Character {
   id: number;
   image_url: string;
   description: string;
+  style: string;
   tags: string[];
   created_at: string;
   type: "character";
@@ -40,6 +42,8 @@ export default function Dashboard() {
   const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGameMaster, setHasGameMaster] = useState(false);
+  const router = useRouter();
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,8 +143,8 @@ export default function Dashboard() {
         !searchQuery ||
         ("tags" in item
           ? item.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase())
-            )
+            tag.toLowerCase().includes(searchQuery.toLowerCase())
+          )
           : item.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
       return matchesDate && matchesSearch;
@@ -170,9 +174,8 @@ export default function Dashboard() {
                   setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
                 }
                 className="flex items-center gap-2 px-3 py-2.5 bg-[#2a2f3e] rounded-lg hover:bg-[#3a3f4e] transition-colors"
-                title={`Sort by ${
-                  sortOrder === "newest" ? "oldest" : "newest"
-                }`}
+                title={`Sort by ${sortOrder === "newest" ? "oldest" : "newest"
+                  }`}
               >
                 <ArrowsUpDownIcon className="w-5 h-5" />
               </button>
@@ -261,61 +264,91 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              <p>Loading...</p>
-            ) : filteredAndSortedItems.length === 0 ? (
-              <p>No items found</p>
-            ) : (
-              filteredAndSortedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-[#2a2f3e] rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
-                >
-                  <div className="aspect-video bg-[#3a3f4e] flex items-center justify-center relative">
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.description}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-400">No Image Available</span>
-                    )}
-                    <span className="absolute top-2 right-2 px-2 py-1 bg-[#1a1f2e]/80 rounded-full text-sm">
-                      {item.type}
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-medium mb-2">{item.description}</h3>
-                    {"tags" in item ? (
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {item.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 bg-[#1a1f2e] rounded-full text-sm text-gray-300"
-                          >
-                            {tag}
+          <div className="space-y-12">
+            {/* Character Section */}
+            <section>
+              <h2 className="text-2xl font-semibold text-white mb-4">Characters</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                  <p>Loading...</p>
+                ) : filteredAndSortedItems.filter((item) => item.type === "character").length === 0 ? (
+                  <p>No characters found</p>
+                ) : (
+                  filteredAndSortedItems
+                    .filter((item) => item.type === "character")
+                    .map((item) => (
+                      <div
+                        key={`character-${item.id}`}
+                        className="bg-[#2a2f3e] rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 hover:bg-[#3a3f4e] transition-all"
+                        onClick={() => router.push(`/character/${item.id}`)}
+                      >
+                        <div className="aspect-video bg-[#3a3f4e] flex items-center justify-center relative">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.description}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-gray-400">No Image Available</span>
+                          )}
+                          <span className="absolute top-2 right-2 px-2 py-1 bg-[#1a1f2e]/80 rounded-full text-sm">
+                            {item.type}
                           </span>
-                        ))}
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-medium mb-2">{item.description}</h3>
+                          <p className="text-sm text-gray-400">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="px-2 py-1 bg-[#1a1f2e] rounded-full text-sm text-gray-300">
-                          {item.style}
-                        </span>
-                        <span className="px-2 py-1 bg-[#1a1f2e] rounded-full text-sm text-gray-300">
-                          {item.tone}
-                        </span>
+                    ))
+                )}
+              </div>
+            </section>
+
+            {/* Map Section */}
+            <section>
+              <h2 className="text-2xl font-semibold text-white mb-4">Maps</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                  <p>Loading...</p>
+                ) : filteredAndSortedItems.filter((item) => item.type === "map").length === 0 ? (
+                  <p>No maps found</p>
+                ) : (
+                  filteredAndSortedItems
+                    .filter((item) => item.type === "map")
+                    .map((map) => (
+                      <div
+                        key={`map-${map.id}`}
+                        className="bg-[#2a2f3e] rounded-lg cursor-pointer hover:ring-2 hover:ring-blue-500 hover:bg-[#3a3f4e] overflow-hidden"
+                      >
+                        <img
+                          src={map.image_url}
+                          alt="Generated map"
+                          className="w-full h-36 sm:h-48 object-cover"
+                        />
+                        <div className="p-3 sm:p-4">
+                          <p className="text-sm text-gray-300 mb-2">Style: {map.style}</p>
+                          <p className="text-sm text-gray-400 line-clamp-2">
+                            {map.description}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(map.created_at).toLocaleDateString()}
+                          </p>
+                          <button
+                            onClick={() => window.open(map.image_url, "_blank")}
+                            className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium"
+                          >
+                            Download Map
+                          </button>
+                        </div>
                       </div>
-                    )}
-                    <p className="text-sm text-gray-400">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
+                    ))
+                )}
+              </div>
+            </section>
           </div>
         </div>
       </div>
