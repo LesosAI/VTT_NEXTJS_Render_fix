@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 type Character = {
   id: number;
@@ -149,8 +151,7 @@ export default function CharacterDetails() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/character/${
-          params.id
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/character/${params.id
         }/tags/${encodeURIComponent(tagToRemove)}`,
         {
           method: "DELETE",
@@ -174,7 +175,9 @@ export default function CharacterDetails() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <AnimatePresence>
+      {isLoading && <ModernLoader />}
+    </AnimatePresence>
   }
 
   if (!character) {

@@ -4,6 +4,8 @@ import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 export default function Plans() {
   const { username } = useLogin();
@@ -50,8 +52,7 @@ export default function Plans() {
   }) => {
     if (
       !confirm(
-        `Are you sure you want to ${
-          plan.isCurrent ? "cancel" : "switch to"
+        `Are you sure you want to ${plan.isCurrent ? "cancel" : "switch to"
         } the ${plan.name} plan?`
       )
     ) {
@@ -111,49 +112,51 @@ export default function Plans() {
     isCurrent: boolean;
     stripePlanName: StripePlanName | "Free";
   }> = [
-    {
-      name: "Player",
-      price: "$0",
-      period: "",
-      description: "Ideal for players starting out with the platform.",
-      features: ["Generate character art", "Export character art"],
-      buttonText:
-        currentSubscription?.plan?.name === "Free" || !currentSubscription
-          ? "Current Plan"
-          : "Downgrade",
-      isCurrent:
-        currentSubscription?.plan?.name === "Free" || !currentSubscription,
-      stripePlanName: "Free",
-    },
-    {
-      name: "Game Master",
-      price: isAnnual ? "$120.00" : "$12.00",
-      period: isAnnual ? "/ year" : "/ month", 
-      description: `Ideal for game masters that need to generate campaigns. ${
-        isAnnual ? "Save 17% with annual billing!" : ""
-      }`,
-      features: [
-        "All of player plan",
-        "Generate campaigns",
-        "Export campaigns",
-        "Generate maps",
-        "Export maps",
-      ],
-      buttonText:
-        currentSubscription?.plan?.name ===
-        (isAnnual ? "Game Master Yearly" : "Game Master Monthly")
-          ? "Current Plan"
-          : "Upgrade",
-      isCurrent:
-        currentSubscription?.plan?.name ===
-        (isAnnual ? "Game Master Yearly" : "Game Master Monthly"),
-      stripePlanName: isAnnual ? "Game Master Yearly" : "Game Master Monthly",
-    },
-  ];
+      {
+        name: "Player",
+        price: "$0",
+        period: "",
+        description: "Ideal for players starting out with the platform.",
+        features: ["Generate character art", "Export character art"],
+        buttonText:
+          currentSubscription?.plan?.name === "Free" || !currentSubscription
+            ? "Current Plan"
+            : "Downgrade",
+        isCurrent:
+          currentSubscription?.plan?.name === "Free" || !currentSubscription,
+        stripePlanName: "Free",
+      },
+      {
+        name: "Game Master",
+        price: isAnnual ? "$120.00" : "$12.00",
+        period: isAnnual ? "/ year" : "/ month",
+        description: `Ideal for game masters that need to generate campaigns. ${isAnnual ? "Save 17% with annual billing!" : ""
+          }`,
+        features: [
+          "All of player plan",
+          "Generate campaigns",
+          "Export campaigns",
+          "Generate maps",
+          "Export maps",
+        ],
+        buttonText:
+          currentSubscription?.plan?.name ===
+            (isAnnual ? "Game Master Yearly" : "Game Master Monthly")
+            ? "Current Plan"
+            : "Upgrade",
+        isCurrent:
+          currentSubscription?.plan?.name ===
+          (isAnnual ? "Game Master Yearly" : "Game Master Monthly"),
+        stripePlanName: isAnnual ? "Game Master Yearly" : "Game Master Monthly",
+      },
+    ];
 
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+      <AnimatePresence>
+        {loading && <ModernLoader />}
+      </AnimatePresence>
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl font-semibold mb-6">Plans</h1>
@@ -161,9 +164,8 @@ export default function Plans() {
           {/* Updated Billing Toggle */}
           <div className="flex items-center justify-center gap-3 mb-6">
             <span
-              className={`text-sm ${
-                !isAnnual ? "text-white" : "text-gray-400"
-              }`}
+              className={`text-sm ${!isAnnual ? "text-white" : "text-gray-400"
+                }`}
             >
               Monthly
             </span>
@@ -172,9 +174,8 @@ export default function Plans() {
               className="w-12 h-6 bg-gray-700 rounded-full relative transition-colors"
             >
               <div
-                className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-200 ${
-                  isAnnual ? "left-7" : "left-1"
-                }`}
+                className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-200 ${isAnnual ? "left-7" : "left-1"
+                  }`}
               />
             </button>
             <span
@@ -226,11 +227,10 @@ export default function Plans() {
 
                 <button
                   onClick={() => !plan.isCurrent && handlePlanAction(plan)}
-                  className={`w-full py-2 rounded-md text-sm font-medium ${
-                    plan.isCurrent
-                      ? "bg-gray-700 text-gray-300 cursor-default"
-                      : "bg-blue-600 hover:bg-blue-700 transition-colors"
-                  }`}
+                  className={`w-full py-2 rounded-md text-sm font-medium ${plan.isCurrent
+                    ? "bg-gray-700 text-gray-300 cursor-default"
+                    : "bg-blue-600 hover:bg-blue-700 transition-colors"
+                    }`}
                   disabled={plan.isCurrent}
                 >
                   {plan.buttonText}

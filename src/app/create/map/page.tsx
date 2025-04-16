@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 type Map = {
   id: number;
@@ -24,6 +26,7 @@ export default function CreateMap() {
   const [mapHistory, setMapHistory] = useState<Map[]>([]);
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchMapHistory = async () => {
     try {
@@ -36,6 +39,8 @@ export default function CreateMap() {
       }
     } catch (error) {
       console.error("Error fetching map history:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,6 +88,9 @@ export default function CreateMap() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+      <AnimatePresence>
+        {loading && <ModernLoader />}
+      </AnimatePresence>
       <div className="p-4 sm:p-8">
         <div className="w-full max-w-[1800px] mx-auto">
           <h1 className="text-2xl font-bold mb-6 sm:mb-8">Create Map</h1>
@@ -120,22 +128,20 @@ export default function CreateMap() {
                   <button
                     type="button"
                     onClick={() => setMapData({ ...mapData, style: "fantasy" })}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      mapData.style === "fantasy"
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${mapData.style === "fantasy"
                         ? "bg-blue-600 text-white"
                         : "text-gray-300 hover:text-white"
-                    }`}
+                      }`}
                   >
                     Fantasy
                   </button>
                   <button
                     type="button"
                     onClick={() => setMapData({ ...mapData, style: "sci-fi" })}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      mapData.style === "sci-fi"
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${mapData.style === "sci-fi"
                         ? "bg-blue-600 text-white"
                         : "text-gray-300 hover:text-white"
-                    }`}
+                      }`}
                   >
                     Sci-Fi
                   </button>
@@ -188,11 +194,10 @@ export default function CreateMap() {
                 <button
                   type="submit"
                   disabled={!mapData.description.trim() || isGenerating}
-                  className={`w-full sm:w-auto py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 ${
-                    !mapData.description.trim() || isGenerating
+                  className={`w-full sm:w-auto py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 ${!mapData.description.trim() || isGenerating
                       ? "bg-gray-600 cursor-not-allowed opacity-50"
                       : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {isGenerating ? (
                     <>

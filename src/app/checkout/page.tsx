@@ -11,6 +11,8 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { CreditCard } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 // Load stripe outside of components render to avoid recreating stripe object on every render
 // const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
@@ -101,6 +103,9 @@ const CheckoutForm = ({ plan, username }: CheckoutFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
       <div>
         <label className="block text-sm font-medium text-white/80">
           Payment method

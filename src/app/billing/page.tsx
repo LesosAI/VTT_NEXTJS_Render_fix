@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 interface BillingInfo {
   planName: string;
@@ -94,7 +96,9 @@ export default function Billing() {
     return (
       <div className="min-h-screen bg-[#1a1f2e] text-white">
         <Topbar />
-        <div className="p-6">Loading...</div>
+        <AnimatePresence>
+          {loading && <ModernLoader />}
+        </AnimatePresence>
       </div>
     );
   }

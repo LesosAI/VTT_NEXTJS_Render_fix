@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useLogin } from "@/context/LoginContext";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 import Topbar from "@/components/Topbar";
 
 export default function Account() {
@@ -48,6 +50,7 @@ export default function Account() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError("");
     setMessage("");
 
@@ -71,11 +74,14 @@ export default function Account() {
       setMessage("Profile updated successfully");
     } catch (error) {
       setError("Failed to update profile");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError("");
     setMessage("");
 
@@ -111,12 +117,18 @@ export default function Account() {
       });
     } catch (error) {
       setError("Failed to change password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
 
       <div className="p-6">
         <div className="max-w-3xl mx-auto">

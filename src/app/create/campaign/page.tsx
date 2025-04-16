@@ -4,6 +4,8 @@ import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import CampaignManager from "./CampaignManager";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 export default function CreateCampaign() {
   const { username } = useLogin();
@@ -12,6 +14,7 @@ export default function CreateCampaign() {
   >([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const [campaignData, setCampaignData] = useState({
@@ -25,6 +28,7 @@ export default function CreateCampaign() {
 
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${username}`
@@ -35,6 +39,8 @@ export default function CreateCampaign() {
         }
       } catch (error) {
         console.error("Error fetching campaigns:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -48,7 +54,7 @@ export default function CreateCampaign() {
   // Update handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setIsLoading(true);
     try {
       if (selectedCampaign) {
         // Update existing campaign
@@ -101,6 +107,8 @@ export default function CreateCampaign() {
     } catch (error) {
       console.error("Error:", error);
       setGeneratedText("Error occurred while processing your request.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -135,6 +143,11 @@ export default function CreateCampaign() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
+
       <div className="p-4 sm:p-8">
         <div className="w-full max-w-[1800px] mx-auto">
           <h1 className="text-2xl font-bold mb-8">Campaign Manager</h1>
@@ -203,9 +216,9 @@ export default function CreateCampaign() {
             {/* Right Side - Campaign Description Form */}
             <div className="mt-4 lg:mt-0">
               {selectedCampaign ? (
-                <CampaignManager 
-                  campaignId={parseInt(selectedCampaign)} 
-                  campaignData={campaignData} 
+                <CampaignManager
+                  campaignId={parseInt(selectedCampaign)}
+                  campaignData={campaignData}
                   onCampaignDataChange={(updated: Partial<typeof campaignData>) => setCampaignData((prev) => ({ ...prev, ...updated }))}
                   onUpdate={handleSubmit}
                 />

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 type Character = {
   id: number;
@@ -20,7 +22,7 @@ export default function CreateCharacter() {
     imageShape: 50,
   });
   const [isGenerating, setIsGenerating] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [generatedImage, setGeneratedImage] = useState("");
   const [characterHistory, setCharacterHistory] = useState<Character[]>([]);
 
@@ -38,6 +40,8 @@ export default function CreateCharacter() {
       }
     } catch (error) {
       console.error("Error fetching character history:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +91,11 @@ export default function CreateCharacter() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
+
       <div className="p-8">
         <div className="w-full max-w-[1800px] mx-auto">
           <h1 className="text-2xl font-bold mb-8">Create Character</h1>
@@ -126,11 +135,10 @@ export default function CreateCharacter() {
                     onClick={() =>
                       setCharacterData({ ...characterData, style: "fantasy" })
                     }
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      characterData.style === "fantasy"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-300 hover:text-white"
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${characterData.style === "fantasy"
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-300 hover:text-white"
+                      }`}
                   >
                     Fantasy
                   </button>
@@ -139,11 +147,10 @@ export default function CreateCharacter() {
                     onClick={() =>
                       setCharacterData({ ...characterData, style: "sci-fi" })
                     }
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      characterData.style === "sci-fi"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-300 hover:text-white"
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${characterData.style === "sci-fi"
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-300 hover:text-white"
+                      }`}
                   >
                     Sci-Fi
                   </button>
@@ -172,8 +179,8 @@ export default function CreateCharacter() {
                   {characterData.imageShape < 33
                     ? "512×512"
                     : characterData.imageShape < 66
-                    ? "768×768"
-                    : "1024×1024"}
+                      ? "768×768"
+                      : "1024×1024"}
                 </div>
               </div>
             </div>
@@ -203,11 +210,10 @@ export default function CreateCharacter() {
                 <button
                   type="submit"
                   disabled={!characterData.description.trim() || isGenerating}
-                  className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
-                    !characterData.description.trim() || isGenerating
-                      ? "bg-gray-600 cursor-not-allowed opacity-50"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                  className={`py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${!characterData.description.trim() || isGenerating
+                    ? "bg-gray-600 cursor-not-allowed opacity-50"
+                    : "bg-blue-600 hover:bg-blue-700"
+                    }`}
                 >
                   {isGenerating ? (
                     <>

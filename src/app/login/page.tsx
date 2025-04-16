@@ -10,8 +10,11 @@ import { Label } from "@/components/ui/label";
 import { useLogin } from "@/context/LoginContext";
 import { motion } from "framer-motion";
 import Banner from "@/components/Banner";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -39,6 +42,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
         method: "POST",
@@ -65,6 +69,8 @@ export default function LoginPage() {
       console.error("Login error:", error);
       setErrorMessage("An unexpected error occurred. Please try again.");
       setBannerErrorOpen(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,6 +91,10 @@ export default function LoginPage() {
           <source src={videoWebmUrl} type="video/webm" />
         </video>
       </div>
+
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
 
       {/* Modal Container */}
       <div className="relative z-20 flex items-center justify-center min-h-screen">

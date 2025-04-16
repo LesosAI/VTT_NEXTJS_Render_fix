@@ -9,8 +9,14 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
-function RegisterForm() {
+interface RegisterFormProps {
+  isLoading: (state: boolean) => void;
+}
+
+function RegisterForm({ isLoading }: RegisterFormProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,6 +30,7 @@ function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    isLoading(true);
     setError("");
 
     if (!agreed) {
@@ -56,6 +63,8 @@ function RegisterForm() {
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
+    } finally {
+      isLoading(false);
     }
   };
 
@@ -204,6 +213,9 @@ function RegisterForm() {
 }
 
 export default function Register() {
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [posterUrl] = useState(
     "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"
   );
@@ -216,6 +228,11 @@ export default function Register() {
 
   return (
     <main className="min-h-screen w-full relative overflow-hidden">
+
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
+
       {/* Full-screen video background */}
       <div className="absolute inset-0 w-full h-full before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
         <video
@@ -258,7 +275,7 @@ export default function Register() {
 
           {/* Content section */}
           <div className="p-8">
-            <RegisterForm />
+            <RegisterForm isLoading={setIsLoading} />
           </div>
         </motion.div>
       </div>

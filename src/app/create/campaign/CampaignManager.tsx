@@ -3,6 +3,8 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import { useLogin } from "@/context/LoginContext";
 import { on } from "events";
 import { motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { ModernLoader } from "@/components/ModernLoader";
 
 interface CampaignData {
   name: string;
@@ -72,6 +74,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
   const promptBoxRef = useRef<HTMLDivElement>(null);
   const allowedRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
 
 
 
@@ -117,32 +121,32 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
     const handleMouseUp = () => {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
-  
+
       const range = selection.getRangeAt(0);
       const selected = selection.toString().trim();
       if (selected.length === 0) return;
-  
+
       const container = allowedRef.current;
       if (!container || !container.contains(range.commonAncestorContainer)) {
         // Selection was outside the allowed area
         return;
       }
-  
+
       // Selection is inside the allowed area
       setSelectionRange(range);
       setSelectedText(selected);
-  
+
       const rect = range.getBoundingClientRect();
       setToolbarPos({
         top: rect.top + window.scrollY - 40,
         left: rect.left + window.scrollX,
       });
     };
-  
+
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
-  
+
 
   useEffect(() => {
     if (toolbarPos && selectionRange) {
@@ -175,6 +179,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
 
   const fetchContents = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content`
@@ -185,10 +190,13 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       }
     } catch (error) {
       console.error("Error fetching contents:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchContentHistory = async (contentId: number) => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${contentId}`
@@ -200,6 +208,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       }
     } catch (error) {
       console.error("Error fetching content history:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -242,6 +252,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   };
 
   const handleDeleteContent = async (contentId: number) => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${contentId}`,
@@ -259,12 +270,14 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       }
     } catch (error) {
       console.error("Error deleting content:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleEditContent = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setIsLoading(true);
     if (!editingContent) return;
 
     try {
@@ -289,11 +302,13 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       }
     } catch (error) {
       console.error("Error updating content:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleRestoreContent = async (contentId: number, restoreContentId: number) => {
-    console.log("Restoring content with ID:", contentId);
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/${campaignId}/content/${contentId}/restore`,
@@ -316,6 +331,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       }
     } catch (error) {
       console.error("Error updating content:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -447,6 +464,9 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
 
   return (
     <>
+      <AnimatePresence>
+        {isLoading && <ModernLoader />}
+      </AnimatePresence>
 
       {showHistory && (
         <>
