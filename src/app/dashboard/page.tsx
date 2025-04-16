@@ -13,6 +13,7 @@ import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
 import Skeleton from 'react-loading-skeleton';
 import clsx from "clsx";
+import Tour from "@/components/Tour";
 
 interface Character {
   id: number;
@@ -162,6 +163,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
+      <Tour />
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto">

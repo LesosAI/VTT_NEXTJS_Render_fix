@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { LoginProvider } from "@/context/LoginContext";
 import { ClientOnly } from "@/components/ClientOnly";
-import Tour from "@/components/Tour";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -45,7 +44,6 @@ export default function RootLayout({
       >
         <LoginProvider>
           <ClientOnly>{children}</ClientOnly>
-          <Tour />
         </LoginProvider>
       </body>
     </html>
