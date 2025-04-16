@@ -12,6 +12,7 @@ import Topbar from "@/components/Topbar";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
 import Skeleton from 'react-loading-skeleton';
+import clsx from "clsx";
 
 interface Character {
   id: number;
@@ -161,7 +162,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
-
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
@@ -214,53 +214,58 @@ export default function Dashboard() {
               {/* Generate Button */}
               <div className="relative flex justify-end">
                 <button
+                  id="generate-btn"
                   onClick={() => setIsGenerateOpen(!isGenerateOpen)}
                   className="px-6 py-2.5 bg-[#2a2f3e] rounded-lg hover:bg-[#3a3f4e] transition-colors font-medium whitespace-nowrap flex items-center gap-2"
                 >
                   Generate <ChevronDownIcon className="w-4 h-4" />
                 </button>
 
-                {isGenerateOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-[#2a2f3e] rounded-lg shadow-lg py-2 z-10 border border-gray-700/30 max-w-[calc(100vw-2rem)]">
-                    <Link
-                      href="/create/character"
-                      className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
-                    >
-                      Create Character
-                    </Link>
-                    {hasGameMaster ? (
-                      <>
-                        <Link
-                          href="/create/map"
-                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
-                        >
-                          Create Map
-                        </Link>
-                        <Link
-                          href="/create/campaign"
-                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
-                        >
-                          Create Campaign
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link
-                          href="/select-plan"
-                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
-                        >
-                          Create Map (Game Master Only)
-                        </Link>
-                        <Link
-                          href="/select-plan"
-                          className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
-                        >
-                          Create Campaign (Game Master Only)
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                )}
+                <div
+                  id="generation-options"
+                  className={clsx(
+                    "absolute top-full left-0 mt-2 w-48 bg-[#2a2f3e] rounded-lg shadow-lg py-2 z-10 border border-gray-700/30 max-w-[calc(100vw-2rem)] transition-all",
+                    isGenerateOpen ? "block" : "invisible pointer-events-none"
+                  )}
+                >
+                  <Link
+                    href="/create/character"
+                    className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
+                  >
+                    Create Character
+                  </Link>
+                  {hasGameMaster ? (
+                    <>
+                      <Link
+                        href="/create/map"
+                        className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
+                      >
+                        Create Map
+                      </Link>
+                      <Link
+                        href="/create/campaign"
+                        className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block"
+                      >
+                        Create Campaign
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/select-plan"
+                        className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
+                      >
+                        Create Map (Game Master Only)
+                      </Link>
+                      <Link
+                        href="/select-plan"
+                        className="w-full px-4 py-2 text-left hover:bg-[#3a3f4e] transition-colors block text-gray-400"
+                      >
+                        Create Campaign (Game Master Only)
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
