@@ -57,7 +57,8 @@ function RegisterForm({ isLoading }: RegisterFormProps) {
       const data = await response.json();
 
       if (response.ok) {
-        router.push("/login");
+        // router.push("/login");
+        router.push(`/verify-email?email=${formData.email}`);
       } else {
         setError(data.error || "An error occurred. Please try again.");
       }
