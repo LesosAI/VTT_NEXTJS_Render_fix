@@ -13,7 +13,8 @@ const publicPages = [
   '/',
   '/landingpage',
   '/select-plan',
-  '/checkout'
+  '/checkout',
+  '/verify-email',
 ];
 
 const gameMasterPages = [
