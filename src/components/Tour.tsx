@@ -4,12 +4,17 @@
 import { useEffect } from 'react';
 import * as Driver from 'driver.js';
 import 'driver.js/dist/driver.css';
+import { useLogin } from '@/context/LoginContext';
 
 const Tour = () => {
+
+    const username = useLogin().username;
+
     useEffect(() => {
         if (typeof window === 'undefined') return; // Ensure it's client-side
 
-        const hasSeenTour = localStorage.getItem('hasSeenTour');
+        const tourKey = `hasSeenTour-${username}`;
+        const hasSeenTour = localStorage.getItem(tourKey);
         if (hasSeenTour) return;
 
         const driver = Driver.driver({
@@ -76,7 +81,7 @@ const Tour = () => {
 
         setTimeout(() => {
             driver.drive();
-            localStorage.setItem('hasSeenTour', 'true');
+            localStorage.setItem(tourKey, 'true');
         }, 500); // Delay to ensure elements are rendered
     }, []);
 
