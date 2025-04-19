@@ -585,7 +585,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
             <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 w-full max-w-[400px]">
               <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
               <form>
-                <div className="mb-4">
+                <div className="mb-2">
                   <label className="block mb-2 text-sm font-medium">
                     Campaign Name
                   </label>
@@ -598,55 +598,55 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                     placeholder="Enter campaign name"
                     required
                   />
-                  {/* Genre Selection */}
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Genre</label>
-                    <select
-                      name="genre"
-                      className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-                      value={campaignData.genre}
-                      onChange={handleChange}
-                    >
-                      <option value="fantasy">Fantasy</option>
-                      <option value="sci-fi">Science Fiction</option>
-                      <option value="horror">Horror</option>
-                      <option value="modern">Modern</option>
-                      <option value="post-apocalyptic">Post-Apocalyptic</option>
-                    </select>
-                  </div>
+                </div>
+                {/* Genre Selection */}
+                <div className="mb-2">
+                  <label className="block mb-2 text-sm font-medium">Genre</label>
+                  <select
+                    name="genre"
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.genre}
+                    onChange={handleChange}
+                  >
+                    <option value="fantasy">Fantasy</option>
+                    <option value="sci-fi">Science Fiction</option>
+                    <option value="horror">Horror</option>
+                    <option value="modern">Modern</option>
+                    <option value="post-apocalyptic">Post-Apocalyptic</option>
+                  </select>
+                </div>
 
-                  {/* Tone Selection */}
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Tone</label>
-                    <select
-                      name="tone"
-                      className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-                      value={campaignData.tone}
-                      onChange={handleChange}
-                    >
-                      <option value="serious">Serious</option>
-                      <option value="lighthearted">Lighthearted</option>
-                      <option value="dark">Dark</option>
-                      <option value="comedic">Comedic</option>
-                    </select>
-                  </div>
+                {/* Tone Selection */}
+                <div className="mb-2">
+                  <label className="block mb-2 text-sm font-medium">Tone</label>
+                  <select
+                    name="tone"
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.tone}
+                    onChange={handleChange}
+                  >
+                    <option value="serious">Serious</option>
+                    <option value="lighthearted">Lighthearted</option>
+                    <option value="dark">Dark</option>
+                    <option value="comedic">Comedic</option>
+                  </select>
+                </div>
 
-                  {/* Setting Selection */}
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Setting</label>
-                    <select
-                      name="setting"
-                      className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
-                      value={campaignData.setting}
-                      onChange={handleChange}
-                    >
-                      <option value="medieval">Medieval</option>
-                      <option value="urban">Urban</option>
-                      <option value="wilderness">Wilderness</option>
-                      <option value="space">Space</option>
-                      <option value="underwater">Underwater</option>
-                    </select>
-                  </div>
+                {/* Setting Selection */}
+                <div className="mb-2">
+                  <label className="block mb-2 text-sm font-medium">Setting</label>
+                  <select
+                    name="setting"
+                    className="w-full p-2 bg-[#1a1f2e] rounded-lg text-sm"
+                    value={campaignData.setting}
+                    onChange={handleChange}
+                  >
+                    <option value="medieval">Medieval</option>
+                    <option value="urban">Urban</option>
+                    <option value="wilderness">Wilderness</option>
+                    <option value="space">Space</option>
+                    <option value="underwater">Underwater</option>
+                  </select>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
