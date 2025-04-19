@@ -894,39 +894,47 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                   <>
                     {/* Floating toolbar like Canvas */}
                     {toolbarPos && (
-                      <div
-                        ref={promptBoxRef}
-                        className="absolute bg-[#2a2f3e] border shadow-md p-3 rounded-md w-96"
-                        style={{ top: toolbarPos.top, left: toolbarPos.left, zIndex: 10 }}
-                      >
-                        <textarea
-                          className="w-full bg-[#1a1f2e] border rounded p-2 text-sm"
-                          rows={2}
-                          placeholder="Enter how you want to change the selected text..."
-                          value={promptInput}
-                          onChange={(e) => setPromptInput(e.target.value)}
-                          autoFocus
-                        />
-                        <div className="flex justify-end mt-2 gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedText("");
-                              setToolbarPos(null);
-                              setPromptInput("");
-                              setSelectionRange(null);
-                            }}
-                            className="text-sm px-2 py-1 rounded bg-gray-600 hover:bg-gray-700"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleRegenerate(content.id)}
-                            className="text-sm px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                          >
-                            Regenerate
-                          </button>
-                        </div>
+                      <motion.div
+                      ref={promptBoxRef}
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute z-50 max-w-md w-full bg-[#1a1f2e] border border-gray-700 shadow-xl rounded-xl p-4 backdrop-blur-lg"
+                      style={{ top: toolbarPos.top, left: toolbarPos.left }}
+                    >
+                      <textarea
+                        value={promptInput}
+                        onChange={(e) => setPromptInput(e.target.value)}
+                        placeholder="How would you like to change this text?"
+                        className="w-full p-3 bg-[#2a2f3e] text-sm rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                        rows={3}
+                        autoFocus
+                      />
+                    
+                      <div className="flex justify-end gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            setSelectedText("");
+                            setToolbarPos(null);
+                            setPromptInput("");
+                            setSelectionRange(null);
+                          }}
+                          className="px-3 py-1.5 text-sm rounded-md bg-gray-600 hover:bg-gray-700 transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleRegenerate(content.id)}
+                          className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-1"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a8 8 0 106.32 12.906l1.387 1.387a1 1 0 001.415-1.415l-1.387-1.387A8 8 0 0010 2z" />
+                          </svg>
+                          Regenerate
+                        </button>
                       </div>
+                    </motion.div>                    
                     )}
 
                     <div className="flex justify-between items-start mb-3">
