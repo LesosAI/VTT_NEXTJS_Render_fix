@@ -29,7 +29,6 @@ const Tour = () => {
             showButtons: [
                 'next',
                 'previous',
-                'close'
             ],
             steps: [
                 {
@@ -39,7 +38,7 @@ const Tour = () => {
                         description: 'Click here to generate your assets.',
                         side: 'bottom',
                         align: 'center',
-                        popoverClass: 'driverjs-theme',                        
+                        popoverClass: 'driverjs-theme',
                         onNextClick: () => {
                             document.getElementById('generate-btn')?.click();
                             driver.moveNext();
