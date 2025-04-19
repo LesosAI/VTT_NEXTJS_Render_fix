@@ -324,10 +324,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
         }
       );
       if (response.ok) {
-        const data = await response.json();
-        fetchContentHistory(data.id);
         fetchContents();
-        setShowHistoryModal(true);
+        setShowHistoryModal(false);
       }
     } catch (error) {
       console.error("Error updating content:", error);
