@@ -20,8 +20,7 @@ const Tour = () => {
         const driver = Driver.driver({
             showProgress: true,
             allowClose: true,
-            popoverClass: 'driverjs-theme',
-            overlayColor: 'rgb(251, 248, 186)',
+            overlayColor: 'rgba(0, 0, 0, 0.7)',
             doneBtnText: 'Finish',
             nextBtnText: 'Next',
             prevBtnText: 'Back',
