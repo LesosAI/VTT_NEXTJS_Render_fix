@@ -237,11 +237,10 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       );
 
       if (response.ok) {
-        setNewContent({
+        setNewContent((prev) => ({
+          ...prev,
           description: "",
-          content_category: "world building",
-        });
-        setSelectedContents([null, null, null]);
+        }));
         fetchContents();
       }
     } catch (error) {
@@ -583,7 +582,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
         {showSettingsModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-[#2a2f3e] rounded-lg p-4 sm:p-6 w-full max-w-[400px]">
-              <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
+              <h2 className="text-xl font-bold mb-4">Update Campaign Details</h2>
               <form>
                 <div className="mb-2">
                   <label className="block mb-2 text-sm font-medium">
@@ -895,46 +894,46 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                     {/* Floating toolbar like Canvas */}
                     {toolbarPos && (
                       <motion.div
-                      ref={promptBoxRef}
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute z-50 max-w-md w-full bg-[#1a1f2e] border border-gray-700 shadow-xl rounded-xl p-4 backdrop-blur-lg"
-                      style={{ top: toolbarPos.top, left: toolbarPos.left }}
-                    >
-                      <textarea
-                        value={promptInput}
-                        onChange={(e) => setPromptInput(e.target.value)}
-                        placeholder="How would you like to change this text?"
-                        className="w-full p-3 bg-[#2a2f3e] text-sm rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                        rows={3}
-                        autoFocus
-                      />
-                    
-                      <div className="flex justify-end gap-2 mt-3">
-                        <button
-                          onClick={() => {
-                            setSelectedText("");
-                            setToolbarPos(null);
-                            setPromptInput("");
-                            setSelectionRange(null);
-                          }}
-                          className="px-3 py-1.5 text-sm rounded-md bg-gray-600 hover:bg-gray-700 transition"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleRegenerate(content.id)}
-                          className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-1"
-                        >
-                          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 2a8 8 0 106.32 12.906l1.387 1.387a1 1 0 001.415-1.415l-1.387-1.387A8 8 0 0010 2z" />
-                          </svg>
-                          Regenerate
-                        </button>
-                      </div>
-                    </motion.div>                    
+                        ref={promptBoxRef}
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute z-50 max-w-md w-full bg-[#1a1f2e] border border-gray-700 shadow-xl rounded-xl p-4 backdrop-blur-lg"
+                        style={{ top: toolbarPos.top, left: toolbarPos.left }}
+                      >
+                        <textarea
+                          value={promptInput}
+                          onChange={(e) => setPromptInput(e.target.value)}
+                          placeholder="How would you like to change this text?"
+                          className="w-full p-3 bg-[#2a2f3e] text-sm rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                          rows={3}
+                          autoFocus
+                        />
+
+                        <div className="flex justify-end gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              setSelectedText("");
+                              setToolbarPos(null);
+                              setPromptInput("");
+                              setSelectionRange(null);
+                            }}
+                            className="px-3 py-1.5 text-sm rounded-md bg-gray-600 hover:bg-gray-700 transition"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleRegenerate(content.id)}
+                            className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-1"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 2a8 8 0 106.32 12.906l1.387 1.387a1 1 0 001.415-1.415l-1.387-1.387A8 8 0 0010 2z" />
+                            </svg>
+                            Regenerate
+                          </button>
+                        </div>
+                      </motion.div>
                     )}
 
                     <div className="flex justify-between items-start mb-3">
