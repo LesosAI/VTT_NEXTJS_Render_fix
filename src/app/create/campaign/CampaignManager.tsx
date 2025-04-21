@@ -702,7 +702,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                 {/* Show selected content below the dropdown */}
                 {selectedContents[index] && (
                   <div className="mt-2 text-xs text-gray-300 bg-[#1a1f2e] p-2 rounded-lg">
-                    {selectedContents[index]?.description.substring(0, 80)}...
+                    {selectedContents[index]?.description.substring(0, 45)}...
                     <button
                       type="button"
                       onClick={() => {
