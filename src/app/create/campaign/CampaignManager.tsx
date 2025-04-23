@@ -5,6 +5,7 @@ import { on } from "events";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
 import { ModernLoader } from "@/components/ModernLoader";
+import EditableToolbar from "./EditableToolbar";
 
 interface CampaignData {
   name: string;
@@ -70,12 +71,12 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const categoryMap = ["world building", "character", "story"];
   const [showHistory, setShowHistory] = useState(false);
   const [selectedText, setSelectedText] = useState("");
+  const [toolbarContentId, setToolbarContentId] = useState<number | null>(null);
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
   const promptBoxRef = useRef<HTMLDivElement>(null);
-  const allowedRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const toolbarRef = useRef<HTMLDivElement | null>(null); // new ref to track toolbar node
 
 
 
@@ -118,7 +119,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   }, [showHistory]);
 
   useEffect(() => {
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
 
@@ -126,19 +127,25 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       const selected = selection.toString().trim();
       if (selected.length === 0) return;
 
-      const container = allowedRef.current;
-      if (!container || !container.contains(range.commonAncestorContainer)) {
-        // Selection was outside the allowed area
-        return;
-      }
+      const anchorNode = selection.anchorNode;
+      if (!anchorNode) return;
 
-      // Selection is inside the allowed area
+      const container = (anchorNode as HTMLElement).parentElement?.closest('[data-content-id]');
+      if (!container) return;
+
+      const contentIdAttr = container.getAttribute('data-content-id');
+      const contentId = contentIdAttr ? parseInt(contentIdAttr) : null;
+      if (!contentId) return;
+
       setSelectionRange(range);
       setSelectedText(selected);
+      setToolbarContentId(contentId);
 
-      const rect = range.getBoundingClientRect();
+      const rects = range.getClientRects();
+      const rect = rects.length > 0 ? rects[0] : range.getBoundingClientRect();
+
       setToolbarPos({
-        top: rect.top + window.scrollY - 40,
+        top: rect.top + window.scrollY + 40,
         left: rect.left + window.scrollX,
       });
     };
@@ -148,6 +155,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   }, []);
 
 
+  // Keep the selected text highlighted while toolbar is open
   useEffect(() => {
     if (toolbarPos && selectionRange) {
       const selection = window.getSelection();
@@ -159,23 +167,24 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   }, [toolbarPos, selectionRange]);
 
 
+  // Close toolbar if user clicks outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        promptBoxRef.current &&
-        !promptBoxRef.current.contains(e.target as Node)
+        toolbarRef.current &&
+        !toolbarRef.current.contains(e.target as Node)
       ) {
         setSelectedText("");
         setToolbarPos(null);
         setPromptInput("");
         setSelectionRange(null);
+        setToolbarContentId(null);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
 
 
   const fetchContents = async () => {
@@ -424,8 +433,9 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
     onCampaignDataChange({ [name]: value });
   };
 
-  const handleRegenerate = async (contentId: number) => {
-    if (!promptInput.trim()) return;
+  const handleRegenerate = async (contentId: number, customPrompt?: string) => {
+    const prompt = customPrompt ?? promptInput;
+    if (!prompt.trim()) return;
     setRegeneratingContentId(contentId);
     setToolbarPos(null);
 
@@ -440,8 +450,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
           body: JSON.stringify({
             username,
             ...campaignData,
-            promptInput,
-            selectedText
+            promptInput: prompt,
+            selectedText,
           }),
         }
       );
@@ -457,7 +467,8 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
       setSelectionRange(null);
       setRegeneratingContentId(null);
     }
-  }
+  };
+
 
   return (
     <>
@@ -891,51 +902,6 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                   </form>
                 ) : (
                   <>
-                    {/* Floating toolbar like Canvas */}
-                    {toolbarPos && (
-                      <motion.div
-                        ref={promptBoxRef}
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute z-50 max-w-md w-full bg-[#1a1f2e] border border-gray-700 shadow-xl rounded-xl p-4 backdrop-blur-lg"
-                        style={{ top: toolbarPos.top, left: toolbarPos.left }}
-                      >
-                        <textarea
-                          value={promptInput}
-                          onChange={(e) => setPromptInput(e.target.value)}
-                          placeholder="How would you like to change this text?"
-                          className="w-full p-3 bg-[#2a2f3e] text-sm rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                          rows={3}
-                          autoFocus
-                        />
-
-                        <div className="flex justify-end gap-2 mt-3">
-                          <button
-                            onClick={() => {
-                              setSelectedText("");
-                              setToolbarPos(null);
-                              setPromptInput("");
-                              setSelectionRange(null);
-                            }}
-                            className="px-3 py-1.5 text-sm rounded-md bg-gray-600 hover:bg-gray-700 transition"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleRegenerate(content.id)}
-                            className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-1"
-                          >
-                            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M10 2a8 8 0 106.32 12.906l1.387 1.387a1 1 0 001.415-1.415l-1.387-1.387A8 8 0 0010 2z" />
-                            </svg>
-                            Regenerate
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-4 text-xs text-gray-400">
                         {content.genre && (
@@ -1041,7 +1007,30 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
                         Regenerating content...
                       </div>
                     ) : (
-                      <p ref={allowedRef} className="whitespace-pre-wrap">{content.content}</p>
+                      <div
+                        data-content-id={content.id}
+                        className="whitespace-pre-wrap"
+                      >
+                        {content.content}
+                        {toolbarPos && toolbarContentId === content.id && (
+                          <EditableToolbar
+                            ref={toolbarRef}
+                            contentId={content.id}
+                            selectedText={selectedText}
+                            toolbarPos={toolbarPos}
+                            onClose={() => {
+                              setSelectedText("");
+                              setToolbarPos(null);
+                              setPromptInput("");
+                              setSelectionRange(null);
+                              setToolbarContentId(null);
+                            }}
+                            onRegenerate={(prompt) => {
+                              handleRegenerate(content.id, prompt);
+                            }}
+                          />
+                        )}
+                      </div>
                     )}
 
                     {chattingContentId === content.id && (
