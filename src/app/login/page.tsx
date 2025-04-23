@@ -198,7 +198,18 @@ export default function LoginPage() {
             </form>
             {errorMessage && bannerErrorOpen && (
               <Banner type="error" onClose={() => setBannerErrorOpen(false)}>
-                {errorMessage}
+                <div className="flex flex-col gap-2">
+                  <span>{errorMessage}</span>
+                  {errorMessage === "Please verify your email" && (
+                    <Button
+                      variant="secondary"
+                      className="self-start mt-2 text-sm"
+                      onClick={() => router.push(`/verify-email?email=${email}`)}
+                    >
+                      Verify Email
+                    </Button>
+                  )}
+                </div>
               </Banner>
             )}
             {/* Footer */}
