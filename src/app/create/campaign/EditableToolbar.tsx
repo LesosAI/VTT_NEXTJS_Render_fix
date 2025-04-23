@@ -80,4 +80,6 @@ const EditableToolbar = forwardRef<HTMLDivElement, EditableToolbarProps>(
   }
 );
 
+EditableToolbar.displayName = "EditableToolbar";
+
 export default EditableToolbar;
