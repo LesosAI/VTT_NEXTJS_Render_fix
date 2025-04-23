@@ -64,11 +64,11 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [chattingContentId, setChattingContentId] = useState<Number | null>(null);
   const [promptInput, setPromptInput] = useState('');
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const tabs: ('world building' | 'character' | 'story')[] = ['world building', 'character', 'story'];
-  const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story' | string>('world building');
+  const tabs: ('world building' | 'character' | 'story/session')[] = ['world building', 'character', 'story/session'];
+  const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story/session' | string>('world building');
   const [regeneratingContentId, setRegeneratingContentId] = useState<number | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const categoryMap = ["world building", "character", "story"];
+  const categoryMap = ["world building", "character", "story/session"];
   const [showHistory, setShowHistory] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [toolbarContentId, setToolbarContentId] = useState<number | null>(null);
@@ -744,7 +744,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
             >
               <option value="World Building">World Building</option>
               <option value="Character">Character</option>
-              <option value="Story">Story</option>
+              <option value="Story/Session">Story/Session</option>
             </select>
           </div>
 
