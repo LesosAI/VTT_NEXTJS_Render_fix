@@ -65,7 +65,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
   const [promptInput, setPromptInput] = useState('');
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
   const tabs: ('world building' | 'character' | 'story')[] = ['world building', 'character', 'story'];
-  const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story'>('world building');
+  const [activeTab, setActiveTab] = useState<'world building' | 'character' | 'story' | string>('world building');
   const [regeneratingContentId, setRegeneratingContentId] = useState<number | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const categoryMap = ["world building", "character", "story"];
@@ -250,6 +250,7 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
           ...prev,
           description: "",
         }));
+        setActiveTab(newContent.content_category.toLowerCase() as typeof activeTab);
         fetchContents();
       }
     } catch (error) {
