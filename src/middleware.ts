@@ -7,6 +7,14 @@ function isImageRequest(path: string) {
   return imageExtensions.some(ext => path.toLowerCase().endsWith(ext))
 }
 
+const redirectIfLoggedInPages = [
+  '/register',
+  '/login',
+  '/',
+  '/landingpage',
+  '/verify-email',
+];
+
 const publicPages = [
   '/register',
   '/login',
@@ -30,7 +38,12 @@ export async function middleware(request: NextRequest) {
   if (isImageRequest(path)) {
     return NextResponse.next()
   }
-  
+
+  // Redirect logged-in users trying to access auth/landing pages
+  if (isLoggedIn && redirectIfLoggedInPages.includes(path)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   // Check if user is trying to access a protected page without being logged in
   if (!isLoggedIn && !publicPages.includes(path)) {
     return NextResponse.redirect(new URL('/landingpage', request.url))
@@ -41,7 +54,7 @@ export async function middleware(request: NextRequest) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`)
       const data = await response.json()
-      
+
       if (!data.has_game_master) {
         return NextResponse.redirect(new URL('/select-plan', request.url))
       }
@@ -50,7 +63,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/select-plan', request.url))
     }
   }
-  
+
   return NextResponse.next()
 }
 
