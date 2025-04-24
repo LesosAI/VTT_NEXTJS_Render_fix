@@ -13,6 +13,8 @@ const redirectIfLoggedInPages = [
   '/',
   '/landingpage',
   '/verify-email',
+  '/forgot-password',
+  '/reset-password',
 ];
 
 const publicPages = [
@@ -23,6 +25,8 @@ const publicPages = [
   '/select-plan',
   '/checkout',
   '/verify-email',
+  '/forgot-password',
+  '/reset-password',
 ];
 
 const gameMasterPages = [
