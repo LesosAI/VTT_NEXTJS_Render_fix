@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
                         <div className="relative">
                             <Input
                                 id="password"
-                                type={showPassword ? "text" : "password"}
+                                type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Confirm new password"
                                 value={confirm}
                                 onChange={(e) => setConfirm(e.target.value)}
