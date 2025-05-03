@@ -100,9 +100,25 @@ export default function CreateCampaign() {
       );
       if (campaignsResponse.ok) {
         const campaignsData = await campaignsResponse.json();
+        const filteredCampaign = campaignsData.find(
+          (c: { id: string }) => c.id === selectedCampaign
+        );
         setCampaigns(campaignsData);
         setShowNewCampaignModal(false);
-        resetCampaignData();
+        setCampaignData(filteredCampaign
+          ? {
+            name: filteredCampaign.name,
+            genre: filteredCampaign.genre,
+            tone: filteredCampaign.tone,
+            setting: filteredCampaign.setting,
+          }
+          : {
+            name: "",
+            genre: "fantasy",
+            tone: "serious",
+            setting: "medieval",
+          }
+        )
       }
     } catch (error) {
       console.error("Error:", error);
