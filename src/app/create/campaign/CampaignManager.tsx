@@ -245,20 +245,62 @@ export default function CampaignManager({ campaignId, campaignData, onCampaignDa
         }
       );
 
-      if (response.ok) {
-        setNewContent((prev) => ({
-          ...prev,
-          description: "",
-        }));
-        setActiveTab(newContent.content_category.toLowerCase() as typeof activeTab);
-        fetchContents();
-      }
+      if (!response.ok) throw new Error("Failed to start generation");
+
+      const { task_id } = await response.json();
+
+      // Poll for status every 3 seconds
+      const checkStatus = async () => {
+        try {
+          const statusRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`
+          );
+          const data = await statusRes.json();
+
+          if (data.status === "completed") {
+            // Process result
+            setNewContent((prev) => ({ ...prev, description: "" }));
+            setActiveTab(newContent.content_category.toLowerCase() as typeof activeTab);
+            fetchContents();
+            setIsGenerating(false);
+
+            // Delete task after processing
+            if (data.should_delete) {
+              await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+                { method: "DELETE" }
+              );
+            }
+
+          } else if (data.status === "failed") {
+            console.error("Generation failed:", data.error);
+            setIsGenerating(false);
+
+            // Also clean up failed task
+            if (data.should_delete) {
+              await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+                { method: "DELETE" }
+              );
+            }
+
+          } else {
+            setTimeout(checkStatus, 3000);
+          }
+        } catch (err) {
+          console.error("Error checking status:", err);
+          setIsGenerating(false);
+        }
+      };
+
+      checkStatus();
+
     } catch (error) {
       console.error("Error generating content:", error);
-    } finally {
       setIsGenerating(false);
     }
   };
+
 
   const handleDeleteContent = async (contentId: number) => {
     setIsLoading(true);
