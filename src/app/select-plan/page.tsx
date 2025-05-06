@@ -6,6 +6,7 @@ import { FaQuestionCircle } from "react-icons/fa";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface Feature {
   text: string;
@@ -47,60 +48,58 @@ const PricingPlan: React.FC<
   onSelect,
   onGetAccess,
 }) => (
-  <div
-    onClick={onSelect}
-    className={`flex flex-col p-6 rounded-xl border-2 ${
-      isSelected
+    <div
+      onClick={onSelect}
+      className={`flex flex-col p-6 rounded-xl border-2 ${isSelected
         ? "border-purple-500 bg-[#1a1f2e]"
         : "border-blue-500/30 bg-[#1a1f2e]"
-    } hover:border-opacity-100 transition-all duration-300 cursor-pointer`}
-  >
-    <div className="flex flex-col h-full">
-      <div className="mb-4">
-        {title === "Game Master" ? (
-          <div className="w-8 h-8 mb-2">
-            <FaQuestionCircle className="w-full h-full text-purple-500" />
-          </div>
-        ) : (
-          <div className="w-8 h-8 mb-2">
-            <svg viewBox="0 0 24 24" className="w-full h-full text-blue-500">
-              <path
-                fill="currentColor"
-                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-              />
-            </svg>
-          </div>
-        )}
-        <h2 className="text-xl font-bold text-white mb-1">{title}</h2>
-        <p className="text-sm text-gray-400">{description}</p>
-      </div>
-      <div className="text-2xl font-bold text-white mb-4">
-        ${price}
-        <span className="text-sm font-normal text-gray-400">/month</span>
-      </div>
-      <div className="space-y-2 flex-grow">
-        {features.map((feature, index) => (
-          <div key={index} className="flex items-center text-sm">
-            {feature.included ? (
-              <AiFillCheckCircle className="w-5 h-5 mr-2 text-green-500" />
-            ) : (
-              <AiFillCloseCircle className="w-5 h-5 mr-2 text-red-500" />
-            )}
-            <span
-              className={`${
-                feature.included
+        } hover:border-opacity-100 transition-all duration-300 cursor-pointer`}
+    >
+      <div className="flex flex-col h-full">
+        <div className="mb-4">
+          {title === "Game Master" ? (
+            <div className="w-8 h-8 mb-2">
+              <FaQuestionCircle className="w-full h-full text-purple-500" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 mb-2">
+              <svg viewBox="0 0 24 24" className="w-full h-full text-blue-500">
+                <path
+                  fill="currentColor"
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+              </svg>
+            </div>
+          )}
+          <h2 className="text-xl font-bold text-white mb-1">{title}</h2>
+          <p className="text-sm text-gray-400">{description}</p>
+        </div>
+        <div className="text-2xl font-bold text-white mb-4">
+          ${price}
+          <span className="text-sm font-normal text-gray-400">/month</span>
+        </div>
+        <div className="space-y-2 flex-grow">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center text-sm">
+              {feature.included ? (
+                <AiFillCheckCircle className="w-5 h-5 mr-2 text-green-500" />
+              ) : (
+                <AiFillCloseCircle className="w-5 h-5 mr-2 text-red-500" />
+              )}
+              <span
+                className={`${feature.included
                   ? "text-gray-300"
                   : "text-gray-500 line-through"
-              }`}
-            >
-              {feature.text}
-            </span>
-          </div>
-        ))}
+                  }`}
+              >
+                {feature.text}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
 const PricingToggle: React.FC<{
   isYearly: boolean;
@@ -115,9 +114,8 @@ const PricingToggle: React.FC<{
       className="relative w-12 h-6 rounded-full bg-gray-700"
     >
       <div
-        className={`absolute w-4 h-4 rounded-full bg-white top-1 transition-all duration-300 ${
-          isYearly ? "left-7" : "left-1"
-        }`}
+        className={`absolute w-4 h-4 rounded-full bg-white top-1 transition-all duration-300 ${isYearly ? "left-7" : "left-1"
+          }`}
       />
     </button>
     <span className={`text-sm ${isYearly ? "text-white" : "text-gray-400"}`}>
@@ -240,10 +238,9 @@ export default function SelectPlanPage() {
                   onClick={handleNextStep}
                   disabled={!selectedPlan}
                   className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 
-                    ${
-                      selectedPlan
-                        ? "bg-purple-500 hover:bg-purple-600 text-white"
-                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    ${selectedPlan
+                      ? "bg-purple-500 hover:bg-purple-600 text-white"
+                      : "bg-gray-600 text-gray-400 cursor-not-allowed"
                     }`}
                 >
                   Next Step →
@@ -253,14 +250,22 @@ export default function SelectPlanPage() {
           </div>
         </div>
 
-        <div className="hidden md:block md:w-1/2 relative">
-          <Image
-            className="object-cover"
-            src="/images/697683_Warrior charging in combat with his shiny armor.png"
-            alt="Plan Selection"
-            priority
-            fill
-            sizes="50vw"
+        <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gradient-to-br from-[#1a1f2e] to-[#0e1826]">
+          <motion.img
+            src="/ForgeLabsLogo.png"
+            alt="Forge Lab Logo"
+            width={600}
+            height={500}
+            className="object-contain"
+            animate={{
+              y: [0, -10, 0],
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
         </div>
       </div>
