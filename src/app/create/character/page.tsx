@@ -56,37 +56,98 @@ export default function CreateCharacter() {
     setIsGenerating(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/generate-image`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            description: characterData.description,
-            style: characterData.style,
-          }),
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/generate-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          description: characterData.description,
+          style: characterData.style,
+        }),
+      });
+
+      const { task_id } = await res.json();
+
+      const checkStatus = async () => {
+        const statusRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`
+        );
+        const data = await statusRes.json();
+
+        if (data.status === "completed") {
+          setGeneratedImage(data.result.image_url);
+          fetchCharacterHistory();
+          setIsGenerating(false);
+
+          // Delete task after processing
+          if (data.should_delete) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+              { method: "DELETE" }
+            );
+          }
+
+        } else if (data.status === "failed") {
+          console.error("Image generation failed:", data.error);
+          setIsGenerating(false);
+
+          // Also clean up failed task
+          if (data.should_delete) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+              { method: "DELETE" }
+            );
+          }
+        } else {
+          setTimeout(checkStatus, 3000);
         }
-      );
+      };
 
-      const data = await response.json();
+      checkStatus();
 
-      if (data.success) {
-        setGeneratedImage(data.image_url);
-        fetchCharacterHistory();
-      } else {
-        console.error("Failed to generate image:", data.error);
-        // You might want to show an error message to the user
-      }
-    } catch (error) {
-      console.error("Error generating image:", error);
-      // You might want to show an error message to the user
-    } finally {
+    } catch (err) {
+      console.error("Error initiating image generation:", err);
       setIsGenerating(false);
     }
   };
+
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsGenerating(true);
+
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/generate-image`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           username,
+  //           description: characterData.description,
+  //           style: characterData.style,
+  //         }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (data.success) {
+  //       setGeneratedImage(data.image_url);
+  //       fetchCharacterHistory();
+  //     } else {
+  //       console.error("Failed to generate image:", data.error);
+  //       // You might want to show an error message to the user
+  //     }
+  //   } catch (error) {
+  //     console.error("Error generating image:", error);
+  //     // You might want to show an error message to the user
+  //   } finally {
+  //     setIsGenerating(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
