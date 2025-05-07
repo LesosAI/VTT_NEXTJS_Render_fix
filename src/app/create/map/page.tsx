@@ -70,17 +70,47 @@ export default function CreateMap() {
         }
       );
 
-      const data = await response.json();
+      const { task_id } = await response.json();
 
-      if (data.success) {
-        setGeneratedImage(data.image_url);
-        fetchMapHistory();
-      } else {
-        console.error("Failed to generate map:", data.error);
-      }
-    } catch (error) {
-      console.error("Error generating map:", error);
-    } finally {
+      const checkStatus = async () => {
+        const statusRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`
+        );
+        const data = await statusRes.json();
+
+        if (data.status === "completed") {
+          setGeneratedImage(data.result.image_url);
+          fetchMapHistory();
+          setIsGenerating(false);
+
+          // Delete task after processing
+          if (data.should_delete) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+              { method: "DELETE" }
+            );
+          }
+
+        } else if (data.status === "failed") {
+          console.error("Image generation failed:", data.error);
+          setIsGenerating(false);
+
+          // Also clean up failed task
+          if (data.should_delete) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/campaigns/generation-status/${task_id}`,
+              { method: "DELETE" }
+            );
+          }
+        } else {
+          setTimeout(checkStatus, 3000);
+        }
+      };
+
+      checkStatus();
+
+    } catch (err) {
+      console.error("Error initiating image generation:", err);
       setIsGenerating(false);
     }
   };
