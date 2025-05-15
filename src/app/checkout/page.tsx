@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLogin } from "@/context/LoginContext";
 import { loadStripe } from "@stripe/stripe-js";
@@ -14,13 +14,12 @@ import { CreditCard } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { ModernLoader } from "@/components/ModernLoader";
 
-// Load stripe outside of components render to avoid recreating stripe object on every render
-// const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+// Load Stripe outside render
 const stripePromise = loadStripe(
-  "pk_test_51PlsaF02khdf3R0A0ZEqrnsXvbZLZbSlGJUjwbv0PyTIkwJG2HgQgo6Fc5bBLSudVxWjMlkFRQVV4lraDO0u8jgR00PQgzovlB"
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-// Add TypeScript interfaces
+// Types
 interface Plan {
   title: string;
   price: number;
@@ -39,73 +38,76 @@ const CheckoutForm = ({ plan, username }: CheckoutFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setIsLoading(true);
     setError(null);
 
     const cardElement = elements.getElement(CardElement);
+    const cardholderName = nameRef.current?.value || "Unnamed";
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      elements,
-      params: {
-        type: "card",
-      },
-    });
+    try {
+      const { error: methodError, paymentMethod } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement!,
+          billing_details: {
+            name: cardholderName,
+          },
+        });
 
-    if (error) {
-      setError(error.message || "Payment failed");
-      setIsLoading(false);
-    } else {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/create-subscription`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username,
-              plan_id: plan.title,
-              price_id: plan.priceId,
-              payment_method_id: paymentMethod.id,
-            }),
-          }
-        );
-        const data = await response.json();
-
-        // Handle payment intent confirmation if needed
-        if (data.status === "requires_action") {
-          const { error } = await stripe.confirmCardPayment(
-            data.payment_intent_client_secret
-          );
-          if (error) {
-            setError(error.message || "Payment confirmation failed");
-            return;
-          }
-        }
-
-        if (data.message === "Subscription created successfully") {
-          router.push("/dashboard");
-        } else {
-          setError("Subscription creation failed. Please try again.");
-        }
-      } catch (err) {
-        setError("An error occurred. Please try again later.");
+      if (methodError) {
+        setError(methodError.message || "Payment method error");
+        setIsLoading(false);
+        return;
       }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/create-subscription`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            plan_id: plan.title,
+            price_id: plan.priceId,
+            payment_method_id: paymentMethod.id,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.status === "requires_action") {
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          data.payment_intent_client_secret
+        );
+        if (confirmError) {
+          setError(confirmError.message || "Card confirmation failed");
+          return;
+        }
+      }
+
+      if (data.message === "Subscription created successfully") {
+        router.push("/dashboard");
+      } else {
+        setError("Subscription failed. Try again.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <AnimatePresence>
-        {isLoading && <ModernLoader />}
-      </AnimatePresence>
+      <AnimatePresence>{isLoading && <ModernLoader />}</AnimatePresence>
+
       <div>
         <label className="block text-sm font-medium text-white/80">
           Payment method
@@ -149,13 +151,16 @@ const CheckoutForm = ({ plan, username }: CheckoutFormProps) => {
           Cardholder name
         </label>
         <input
+          ref={nameRef}
           type="text"
           placeholder="Bertrand Bruandet"
           className="mt-1 block w-full rounded-md border border-white/20 px-3 py-2 h-[45px] bg-[#0e1826] text-white placeholder-white/50"
+          required
         />
       </div>
 
       {error && <div className="text-red-400 text-sm">{error}</div>}
+
       <button
         type="submit"
         disabled={!stripe || isLoading}
@@ -167,7 +172,6 @@ const CheckoutForm = ({ plan, username }: CheckoutFormProps) => {
   );
 };
 
-// Convert main component to server component
 export default function Checkout() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -180,20 +184,17 @@ export default function Checkout() {
     }
   }, [plan, router]);
 
-  if (!plan) {
-    return null;
-  }
+  if (!plan) return null;
 
   return (
     <div className="min-h-screen flex flex-row-reverse bg-[#0e1826]">
-      {/* Right side - Dark gradient with pricing */}
+      {/* Pricing panel */}
       <div className="w-[60%] bg-gradient-to-b from-[#755FF8] to-[#8470FF] p-12 text-white flex items-center justify-center">
         <div className="max-w-md w-full text-center">
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 bg-white rounded-full mb-4" />
             <span className="text-2xl font-semibold">VTT Workshop</span>
           </div>
-
           <div className="mb-8">
             <div className="text-sm mb-2">Subscribe to {plan.title}</div>
             <div className="flex items-baseline justify-center">
@@ -203,7 +204,6 @@ export default function Checkout() {
               </span>
             </div>
           </div>
-
           <div className="space-y-4 text-sm">
             <div className="flex justify-between items-center">
               <span className="w-1/2 text-left">{plan.title}</span>
@@ -211,8 +211,7 @@ export default function Checkout() {
             </div>
             <div className="flex justify-between items-center opacity-80">
               <span className="w-1/2 text-left">
-                Billed{" "}
-                {plan.description.includes("yearly") ? "yearly" : "monthly"}
+                Billed {plan.description.includes("yearly") ? "yearly" : "monthly"}
               </span>
               <span className="w-1/2 text-right"></span>
             </div>
@@ -232,7 +231,7 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Left side - Payment form */}
+      {/* Form side */}
       <div className="flex-1 bg-[#0e1826] flex items-center justify-center">
         <div className="w-full max-w-md p-8">
           <Elements stripe={stripePromise}>
