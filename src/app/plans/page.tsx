@@ -11,6 +11,10 @@ export default function Plans() {
   const { username } = useLogin();
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingPrices, setLoadingPrices] = useState(true); // loading state for prices
+  const [gameMasterPrices, setGameMasterPrices] = useState<
+    { price_id: string; amount: number; currency: string; interval: string }[]
+  >([]);
   const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(false);
 
@@ -36,15 +40,36 @@ export default function Plans() {
     }
   }, [username]);
 
-  const STRIPE_PRICE_IDS = {
-    "Game Master Monthly": "price_1R64E502khdf3R0A1tvUHNbt",
-    "Game Master Yearly": "price_1R64E502khdf3R0AbLwQdeAA",
-  } as const;
+  // New useEffect: Fetch Game Master prices from your new API
+  useEffect(() => {
+    const fetchGameMasterPrices = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/game-master/prices`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setGameMasterPrices(data.prices);
+        } else {
+          console.error("Failed to fetch Game Master prices");
+        }
+      } catch (err) {
+        console.error("Error fetching Game Master prices:", err);
+      } finally {
+        setLoadingPrices(false);
+      }
+    };
 
-  type StripePlanName = keyof typeof STRIPE_PRICE_IDS;
+    fetchGameMasterPrices();
+  }, []);
 
+  // Helper to get price info by interval
+  const getPriceByInterval = (interval: string) =>
+    gameMasterPrices.find((p) => p.interval === interval);
+
+  // Updated handlePlanAction to dynamically use price IDs
   const handlePlanAction = async (plan: {
-    stripePlanName: StripePlanName | "Free";
+    stripePlanName: string;
     price: string;
     description: string;
     name: string;
@@ -61,7 +86,6 @@ export default function Plans() {
 
     try {
       if (plan.name === "Player" && !plan.isCurrent) {
-        // For Player (Free) plan, just cancel the existing subscription
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${username}/subscription/cancel`,
           {
@@ -77,17 +101,20 @@ export default function Plans() {
           throw new Error(errorData.error || "Failed to downgrade plan");
         }
 
-        // Refresh the page to show updated subscription status
         window.location.reload();
       } else if (plan.name === "Game Master" && !plan.isCurrent) {
-        // Redirect to checkout page with plan details
+        const priceObj = gameMasterPrices.find(
+          (p) => p.interval === (isAnnual ? "year" : "month")
+        );
+        if (!priceObj) {
+          alert("Price info not available");
+          return;
+        }
+
         const checkoutPlan = {
           title: plan.stripePlanName,
-          price: parseFloat(plan.price.replace("$", "")),
-          priceId:
-            plan.stripePlanName !== "Free"
-              ? STRIPE_PRICE_IDS[plan.stripePlanName]
-              : "",
+          price: priceObj.amount,
+          priceId: priceObj.price_id,
           description: plan.description,
         };
 
@@ -110,7 +137,7 @@ export default function Plans() {
     features: string[];
     buttonText: string;
     isCurrent: boolean;
-    stripePlanName: StripePlanName | "Free";
+    stripePlanName: string;
   }> = [
       {
         name: "Player",
@@ -128,7 +155,11 @@ export default function Plans() {
       },
       {
         name: "Game Master",
-        price: isAnnual ? "$120.00" : "$12.00",
+        price:
+          loadingPrices
+            ? "Loading..."
+            : `$${getPriceByInterval(isAnnual ? "year" : "month")?.amount.toFixed(2) ?? "N/A"
+            }`,
         period: isAnnual ? "/ year" : "/ month",
         description: `Ideal for game masters that need to generate campaigns. ${isAnnual ? "Save 17% with annual billing!" : ""
           }`,
@@ -154,14 +185,12 @@ export default function Plans() {
   return (
     <div className="min-h-screen bg-[#1a1f2e] text-white">
       <Topbar />
-      <AnimatePresence>
-        {loading && <ModernLoader />}
-      </AnimatePresence>
+      <AnimatePresence>{(loading || loadingPrices) && <ModernLoader />}</AnimatePresence>
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl font-semibold mb-6">Plans</h1>
 
-          {/* Updated Billing Toggle */}
+          {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-3 mb-6">
             <span
               className={`text-sm ${!isAnnual ? "text-white" : "text-gray-400"
@@ -231,7 +260,7 @@ export default function Plans() {
                     ? "bg-gray-700 text-gray-300 cursor-default"
                     : "bg-blue-600 hover:bg-blue-700 transition-colors"
                     }`}
-                  disabled={plan.isCurrent}
+                  disabled={plan.isCurrent || loadingPrices}
                 >
                   {plan.buttonText}
                 </button>
