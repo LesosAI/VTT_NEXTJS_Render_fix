@@ -82,7 +82,7 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
     Cookies.remove("isLoggedIn");
     Cookies.remove("username");
     Cookies.remove("isSubaccount");
-    router.push("/landingpage");
+    router.push("/register");
   };
 
   return (

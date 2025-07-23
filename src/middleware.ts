@@ -11,7 +11,6 @@ const redirectIfLoggedInPages = [
   '/register',
   '/login',
   '/',
-  '/landingpage',
   '/verify-email',
   '/forgot-password',
   '/reset-password',
@@ -21,7 +20,6 @@ const publicPages = [
   '/register',
   '/login',
   '/',
-  '/landingpage',
   '/select-plan',
   '/checkout',
   '/verify-email',
@@ -50,10 +48,12 @@ export async function middleware(request: NextRequest) {
 
   // Check if user is trying to access a protected page without being logged in
   if (!isLoggedIn && !publicPages.includes(path)) {
-    return NextResponse.redirect(new URL('/landingpage', request.url))
+    return NextResponse.redirect(new URL('/register', request.url))
   }
 
-  // Check permissions for Game Master features
+  // TEMPORARILY DISABLED: Check permissions for Game Master features
+  // This allows access to create/campaign without requiring a subscription
+  /*
   if (gameMasterPages.includes(path)) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`)
@@ -67,6 +67,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/select-plan', request.url))
     }
   }
+  */
 
   return NextResponse.next()
 }
