@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,15 +22,29 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useLogin();
-  const [posterUrl] = useState(
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"
-  );
-  const [videoMp4Url] = useState(
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.mp4"
-  );
-  const [videoWebmUrl] = useState(
-    "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.webm"
-  );
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.error("Error attempting to play video:", error);
+      });
+      
+      // Add error event listener
+      const handleError = (e: Event) => {
+        console.error("Video error event:", e);
+        console.error("Video error details:", videoRef.current?.error);
+      };
+      
+      videoRef.current.addEventListener('error', handleError);
+      
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('error', handleError);
+        }
+      };
+    }
+  }, []);
 
   // Clear error when email or password changes
   useEffect(() => {
@@ -77,18 +91,17 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen w-full relative overflow-hidden">
       {/* Full-screen video background */}
-      <div className="absolute inset-0 w-full h-full before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
-        <video
-          autoPlay
-          loop
-          muted
+      <div className="absolute inset-0 w-full h-full">
+        <video 
+          ref={videoRef} 
+          className="absolute inset-0 w-full h-full object-cover z-20" 
+          autoPlay 
+          loop 
+          muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ backgroundImage: `url(${posterUrl})` }}
-          poster={posterUrl}
+          src="https://ehsy09fkhluxh2uw.public.blob.vercel-storage.com/fire-and-sparks.mp4"
         >
-          <source src={videoMp4Url} type="video/mp4" />
-          <source src={videoWebmUrl} type="video/webm" />
+          Your browser does not support the video tag.
         </video>
       </div>
 
@@ -104,22 +117,6 @@ export default function LoginPage() {
           transition={{ duration: 0.5 }}
           className="bg-[#0e1826]/90 backdrop-blur-lg rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-w-xl w-full mx-4"
         >
-          {/* Video section */}
-          <div className="h-[300px] relative rounded-t-xl overflow-hidden before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              style={{ backgroundImage: `url(${posterUrl})` }}
-              poster={posterUrl}
-            >
-              <source src={videoMp4Url} type="video/mp4" />
-              <source src={videoWebmUrl} type="video/webm" />
-            </video>
-          </div>
-
           {/* Content section */}
           <div className="p-8">
             <h1 className="text-4xl text-white font-bold mb-8">

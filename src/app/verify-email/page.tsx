@@ -9,6 +9,7 @@ export default function VerifyEmailPage() {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
     const token = searchParams.get("token");
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     const [message, setMessage] = useState("");
     const [verifying, setVerifying] = useState(false);
@@ -16,15 +17,28 @@ export default function VerifyEmailPage() {
     const [isResending, setIsResending] = useState(false);
     const hasSentRef = useRef(false);
 
-    const [posterUrl] = useState(
-        "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-poster-00001.jpg"
-    );
-    const [videoMp4Url] = useState(
-        "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.mp4"
-    );
-    const [videoWebmUrl] = useState(
-        "https://cdn.prod.website-files.com/64a466f88f23f57bfdd487cd/64a57bf0ef680a13e9340f22_banner video background-transcode.webm"
-    );
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.play().catch((error) => {
+                console.error("Error attempting to play video:", error);
+            });
+            
+            // Add error event listener
+            const handleError = (e: Event) => {
+                console.error("Video error event:", e);
+                console.error("Video error details:", videoRef.current?.error);
+            };
+            
+            videoRef.current.addEventListener('error', handleError);
+            
+            return () => {
+                if (videoRef.current) {
+                    videoRef.current.removeEventListener('error', handleError);
+                }
+            };
+        }
+    }, []);
+
 
     useEffect(() => {
         if (token) {
@@ -87,18 +101,17 @@ export default function VerifyEmailPage() {
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-[#0e1826] text-white px-4">
-            <div className="absolute inset-0 w-full h-full before:absolute before:inset-0 before:z-10 before:bg-gradient-to-b before:from-[#e900264d] before:to-[#0e1826]">
+            <div className="absolute inset-0 w-full h-full">
                 <video
+                    ref={videoRef}
                     autoPlay
                     loop
                     muted
                     playsInline
                     className="absolute inset-0 w-full h-full object-cover"
-                    style={{ backgroundImage: `url(${posterUrl})` }}
-                    poster={posterUrl}
+                    src="https://ehsy09fkhluxh2uw.public.blob.vercel-storage.com/fire-and-sparks.mp4"
                 >
-                    <source src={videoMp4Url} type="video/mp4" />
-                    <source src={videoWebmUrl} type="video/webm" />
+                    Your browser does not support the video tag.
                 </video>
             </div>
             <div className="relative z-20 max-w-md w-full bg-[#0e1826]/60 border border-white/10 rounded-lg p-8 shadow-xl text-center backdrop-blur-sm">
