@@ -120,7 +120,7 @@ export default function LoginPage() {
           {/* Content section */}
           <div className="p-8">
             <h1 className="text-4xl text-white font-bold mb-8">
-              Welcome Back!
+              Welcome!
             </h1>
             {/* Form */}
             <form onSubmit={handleLogin}>
