@@ -15,6 +15,26 @@ type Character = {
   tags: string[];
 };
 
+// Function to generate abbreviated filename from description
+const generateAbbreviatedFilename = (description: string): string => {
+  // Remove common words and clean up the description
+  const commonWords = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those'];
+  
+  // Split description into words and filter out common words
+  const words = description
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '') // Remove punctuation
+    .split(/\s+/)
+    .filter(word => word.length > 0 && !commonWords.includes(word))
+    .slice(0, 5); // Take first 5 meaningful words
+  
+  // Join words and limit to 30 characters
+  const abbreviated = words.join('-').substring(0, 30);
+  
+  // If no meaningful words found, use a default
+  return abbreviated || 'character';
+};
+
 export default function CharacterDetails() {
   const [character, setCharacter] = useState<Character | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +93,7 @@ export default function CharacterDetails() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `character-${params.id}.png`;
+      a.download = `${generateAbbreviatedFilename(character.description)}.png`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -104,7 +124,7 @@ export default function CharacterDetails() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `character-${params.id}-token.png`;
+      a.download = `${generateAbbreviatedFilename(character.description)}-token.png`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
