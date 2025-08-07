@@ -1,45 +1,50 @@
-import Stripe from "stripe";
 import { redirect } from "next/navigation";
 import SelectPlanComponent from "./SelectPlanComponent";
 
-
-const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-09-30.acacia",
-});
-
 export default async function SelectPlanPage() {
-  const products = await stripe.products.list({ active: true });
-  const gameMaster = products.data.find(p => p.name === "Game Master");
+  try {
+    // Fetch prices from backend API instead of direct Stripe call
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/game-master/prices`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!gameMaster) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch pricing plans');
+    }
+
+    const data = await response.json();
+    
+    let monthlyPrice: number | undefined;
+    let monthlyPriceId: string | undefined;
+    let yearlyPrice: number | undefined;
+    let yearlyPriceId: string | undefined;
+
+    // Extract prices from backend response
+    data.prices.forEach((price: any) => {
+      if (price.interval === "month") {
+        monthlyPrice = price.amount;
+        monthlyPriceId = price.price_id;
+      } else if (price.interval === "year") {
+        yearlyPrice = price.amount;
+        yearlyPriceId = price.price_id;
+      }
+    });
+
+    return (
+      <SelectPlanComponent
+        gameMasterPlan={{
+          monthlyPrice,
+          yearlyPrice,
+          monthlyPriceId,
+          yearlyPriceId,
+        }}
+      />
+    );
+  } catch (error) {
+    console.error('Error fetching pricing plans:', error);
     return <div className="text-white p-4">Failed to load pricing plan.</div>;
   }
-
-  const prices = await stripe.prices.list({ product: gameMaster.id });
-
-  let monthlyPrice: number | undefined;
-  let monthlyPriceId: string | undefined;
-  let yearlyPrice: number | undefined;
-  let yearlyPriceId: string | undefined;
-
-  prices.data.forEach(price => {
-    if (price.recurring?.interval === "month") {
-      monthlyPrice = price.unit_amount! / 100;
-      monthlyPriceId = price.id;
-    } else if (price.recurring?.interval === "year") {
-      yearlyPrice = price.unit_amount! / 100;
-      yearlyPriceId = price.id;
-    }
-  });
-
-  return (
-    <SelectPlanComponent
-      gameMasterPlan={{
-        monthlyPrice,
-        yearlyPrice,
-        monthlyPriceId,
-        yearlyPriceId,
-      }}
-    />
-  );
 }

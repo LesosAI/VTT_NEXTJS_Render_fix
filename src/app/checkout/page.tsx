@@ -15,9 +15,14 @@ import { AnimatePresence } from "framer-motion";
 import { ModernLoader } from "@/components/ModernLoader";
 
 // Load Stripe outside render
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+console.log("Stripe publishable key:", stripePublishableKey ? `${stripePublishableKey.substring(0, 20)}...` : "NOT FOUND");
+
+if (!stripePublishableKey) {
+  console.error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set!");
+}
+
+const stripePromise = loadStripe(stripePublishableKey!);
 
 // Types
 interface Plan {
@@ -193,7 +198,7 @@ export default function Checkout() {
         <div className="max-w-md w-full text-center">
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 bg-white rounded-full mb-4" />
-            <span className="text-2xl font-semibold">VTT Workshop</span>
+            <span className="text-2xl font-semibold">ForgeLab</span>
           </div>
           <div className="mb-8">
             <div className="text-sm mb-2">Subscribe to {plan.title}</div>
@@ -234,9 +239,21 @@ export default function Checkout() {
       {/* Form side */}
       <div className="flex-1 bg-[#0e1826] flex items-center justify-center">
         <div className="w-full max-w-md p-8">
-          <Elements stripe={stripePromise}>
-            <CheckoutForm plan={plan} username={username} />
-          </Elements>
+          {stripePublishableKey ? (
+            <Elements stripe={stripePromise}>
+              <CheckoutForm plan={plan} username={username} />
+            </Elements>
+          ) : (
+            <div className="text-white text-center">
+              <h2 className="text-xl font-semibold mb-2">Payment Configuration Error</h2>
+              <p className="text-white/70">
+                Stripe is not properly configured. Please check your environment variables.
+              </p>
+              <p className="text-sm text-white/50 mt-2">
+                NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is missing
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
