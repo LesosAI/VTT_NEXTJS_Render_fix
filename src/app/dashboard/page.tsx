@@ -35,6 +35,20 @@ interface Map {
   type: "map";
 }
 
+interface Subscription {
+  status: string;
+  plan: {
+    name: string;
+    description: string;
+    price: number;
+    interval: string;
+    usage_limit: number | null;
+  };
+  usage_count: number;
+  current_period_start: string;
+  current_period_end: string;
+}
+
 export default function Dashboard() {
   const { username } = useLogin();
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,6 +59,8 @@ export default function Dashboard() {
   const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGameMaster, setHasGameMaster] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const router = useRouter();
 
 
@@ -98,9 +114,26 @@ export default function Dashboard() {
       }
     };
 
+    const fetchSubscription = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${username}/subscription`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setSubscription(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription:", error);
+      } finally {
+        setSubscriptionLoading(false);
+      }
+    };
+
     if (username) {
       fetchData();
       fetchPermissions();
+      fetchSubscription();
     }
   }, [username]);
 
@@ -169,6 +202,26 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
             <h1 className="text-3xl font-bold">Dashboard</h1>
+
+            {/* Upgrade Prompt for Free Users */}
+            {!subscriptionLoading && subscription && subscription.plan.name === 'Free' && (
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 text-white shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">Upgrade to Game Master</h3>
+                    <p className="text-purple-100 text-sm">
+                      Unlock campaign and map creation features
+                    </p>
+                  </div>
+                  <Link
+                    href="/select-plan"
+                    className="px-4 py-2 bg-white text-purple-600 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    Upgrade Now
+                  </Link>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               {/* Sort Button */}

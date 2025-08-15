@@ -9,6 +9,7 @@ import { ModernLoader } from "@/components/ModernLoader";
 import { WalkthroughProvider } from "@/components/WalkthroughProvider";
 import { WalkthroughSteps, campaignWalkthroughSteps } from "@/components/WalkthroughSteps";
 import { WalkthroughButton } from "@/components/WalkthroughButton";
+import { useSubscriptionCheck } from "@/hooks/useSubscriptionCheck";
 
 export default function CreateCampaign() {
   const { username } = useLogin();
@@ -20,6 +21,9 @@ export default function CreateCampaign() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // Check subscription access
+  const { subscription, loading: subscriptionLoading, hasAccess } = useSubscriptionCheck();
+
   const [campaignData, setCampaignData] = useState({
     name: "",
     genre: "fantasy",
@@ -28,6 +32,20 @@ export default function CreateCampaign() {
   });
 
   const [generatedText, setGeneratedText] = useState("");
+
+  // Show loading while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
+        <ModernLoader />
+      </div>
+    );
+  }
+
+  // Redirect if no access (this will happen automatically via the hook)
+  if (!hasAccess) {
+    return null;
+  }
 
   useEffect(() => {
     const fetchCampaigns = async () => {

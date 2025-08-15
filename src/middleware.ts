@@ -51,9 +51,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/register', request.url))
   }
 
-  // TEMPORARILY DISABLED: Check permissions for Game Master features
-  // This allows access to create/campaign without requiring a subscription
-  /*
+  // Check permissions for Game Master features
   if (gameMasterPages.includes(path)) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`)
@@ -67,7 +65,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/select-plan', request.url))
     }
   }
-  */
 
   return NextResponse.next()
 }

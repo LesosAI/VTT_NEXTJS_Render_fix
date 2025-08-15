@@ -8,6 +8,7 @@ import { ModernLoader } from "@/components/ModernLoader";
 import { WalkthroughProvider } from "@/components/WalkthroughProvider";
 import { WalkthroughSteps, mapWalkthroughSteps } from "@/components/WalkthroughSteps";
 import { WalkthroughButton } from "@/components/WalkthroughButton";
+import { useSubscriptionCheck } from "@/hooks/useSubscriptionCheck";
 
 type Map = {
   id: number;
@@ -30,6 +31,23 @@ export default function CreateMap() {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Check subscription access
+  const { subscription, loading: subscriptionLoading, hasAccess } = useSubscriptionCheck();
+
+  // Show loading while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
+        <ModernLoader />
+      </div>
+    );
+  }
+
+  // Redirect if no access (this will happen automatically via the hook)
+  if (!hasAccess) {
+    return null;
+  }
 
   const fetchMapHistory = async () => {
     try {
