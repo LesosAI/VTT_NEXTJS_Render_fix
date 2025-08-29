@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Topbar from "@/components/Topbar";
 import UserDetailModal from "@/components/UserDetailModal";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { useLogin } from "@/context/LoginContext";
 import { useRouter } from "next/navigation";
 
@@ -55,6 +56,11 @@ interface Pagination {
   has_prev: boolean;
 }
 
+interface SortConfig {
+  key: 'username' | 'email' | 'subscription' | 'status' | null;
+  direction: 'asc' | 'desc';
+}
+
 export default function AdminPanel() {
   const { username, logout } = useLogin();
   const router = useRouter();
@@ -76,6 +82,13 @@ export default function AdminPanel() {
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
 
   // Check admin authentication - hardcoded approach
   useEffect(() => {
@@ -180,16 +193,20 @@ export default function AdminPanel() {
     }
   };
 
+  // Show delete confirmation modal
+  const showDeleteConfirmation = (user: User) => {
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
   // Delete user
-  const deleteUser = async (userId: number) => {
-    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      return;
-    }
+  const deleteUser = async () => {
+    if (!userToDelete) return;
 
     try {
-      setDeleteLoading(userId);
+      setDeleteLoading(userToDelete.id);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users/${userId}?email=${encodeURIComponent(username)}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users/${userToDelete.id}?email=${encodeURIComponent(username)}`,
         { method: 'DELETE' }
       );
       
@@ -201,6 +218,9 @@ export default function AdminPanel() {
         // Refresh stats
         fetchStats();
         alert("User deleted successfully");
+        // Close modal
+        setDeleteModalOpen(false);
+        setUserToDelete(null);
       } else {
         alert("Failed to delete user: " + data.error);
       }
@@ -210,6 +230,67 @@ export default function AdminPanel() {
     } finally {
       setDeleteLoading(null);
     }
+  };
+
+  // Close delete confirmation modal
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setUserToDelete(null);
+  };
+
+  // Handle sorting
+  const handleSort = (key: 'username' | 'email' | 'subscription' | 'status') => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Handle sorting from dropdown - always starts with ascending
+  const handleDropdownSort = (key: 'username' | 'email' | 'subscription' | 'status') => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Sort users based on current sort configuration
+  const getSortedUsers = () => {
+    if (!sortConfig.key) return users;
+
+    return [...users].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortConfig.key) {
+        case 'username':
+          aValue = (a.first_name && a.last_name) ? `${a.first_name} ${a.last_name}` : a.username;
+          bValue = (b.first_name && b.last_name) ? `${b.first_name} ${b.last_name}` : b.username;
+          break;
+        case 'email':
+          aValue = a.email.toLowerCase();
+          bValue = b.email.toLowerCase();
+          break;
+        case 'subscription':
+          // Sort by subscription status: paid users first (asc) or unpaid users first (desc)
+          // Use numbers for proper sorting: 1 = paid, 0 = unpaid
+          aValue = a.subscription ? 1 : 0;
+          bValue = b.subscription ? 1 : 0;
+          break;
+        case 'status':
+          // Sort by verification status: verified users first (asc) or unverified users first (desc)
+          // Use numbers for proper sorting: 1 = verified, 0 = unverified
+          aValue = a.is_verified ? 1 : 0;
+          bValue = b.is_verified ? 1 : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
   };
 
   // Handle search
@@ -446,10 +527,106 @@ export default function AdminPanel() {
 
                      {activeSection === "users" && (
              <div className="space-y-6">
-               <div className="flex items-center space-x-3 mb-6">
-                 <div className="w-1 h-8 bg-gradient-to-b from-purple-400 to-blue-400 rounded-full"></div>
-                 <h2 className="text-2xl font-semibold text-[#e0e0e0]">User Management</h2>
-               </div>
+                               <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-purple-400 to-blue-400 rounded-full"></div>
+                    <h2 className="text-2xl font-semibold text-[#e0e0e0]">User Management</h2>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    {/* Sort Button Dropdown */}
+                    <div className="relative group">
+                      <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#2a2f3e]/80 to-[#3a3f4e]/80 hover:from-[#3a3f4e]/80 hover:to-[#4a4f5e]/80 text-[#d0d0d0] hover:text-white rounded-xl transition-all duration-200 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50">
+                        <span className="text-sm font-medium">Sort</span>
+                        <svg className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-[#2a2f3e] to-[#3a3f4e] rounded-xl border border-[#4a4f5e]/30 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div className="py-2">
+                          {/* User Name Sorting */}
+                          <button
+                            onClick={() => handleDropdownSort('username')}
+                            className="w-full px-4 py-3 text-left text-sm text-[#d0d0d0] hover:text-white hover:bg-[#3a3f4e]/50 transition-colors duration-200 flex items-center justify-between"
+                          >
+                            <span>User Name</span>
+                            {sortConfig.key === 'username' && (
+                              <span className="text-purple-400 text-xs">
+                                {sortConfig.direction === 'asc' ? 'A-Z' : 'Z-A'}
+                              </span>
+                            )}
+                          </button>
+                          
+                          {/* Email Sorting */}
+                          <button
+                            onClick={() => handleDropdownSort('email')}
+                            className="w-full px-4 py-3 text-left text-sm text-[#d0d0d0] hover:text-white hover:bg-[#3a3f4e]/50 transition-colors duration-200 flex items-center justify-between"
+                          >
+                            <span>Email</span>
+                            {sortConfig.key === 'email' && (
+                              <span className="text-purple-400 text-xs">
+                                {sortConfig.direction === 'asc' ? 'A-Z' : 'Z-A'}
+                              </span>
+                            )}
+                          </button>
+                          
+                          {/* Subscription Sorting */}
+                          <button
+                            onClick={() => handleDropdownSort('subscription')}
+                            className="w-full px-4 py-3 text-left text-sm text-[#d0d0d0] hover:text-white hover:bg-[#3a3f4e]/50 transition-colors duration-200 flex items-center justify-between"
+                          >
+                            <span>Subscription</span>
+                            {sortConfig.key === 'subscription' && (
+                              <span className="text-purple-400 text-xs">
+                                {sortConfig.direction === 'asc' ? 'Paid First' : 'Unpaid First'}
+                              </span>
+                            )}
+                          </button>
+                          
+                          {/* Status Sorting */}
+                          <button
+                            onClick={() => handleDropdownSort('status')}
+                            className="w-full px-4 py-3 text-left text-sm text-[#d0d0d0] hover:text-white hover:bg-[#3a3f4e]/50 transition-colors duration-200 flex items-center justify-between"
+                          >
+                            <span>Verification Status</span>
+                            {sortConfig.key === 'status' && (
+                              <span className="text-purple-400 text-xs">
+                                {sortConfig.direction === 'asc' ? 'Verified First' : 'Unverified First'}
+                              </span>
+                            )}
+                          </button>
+                          
+                          {/* Divider */}
+                          <div className="border-t border-[#4a4f5e]/30 my-2"></div>
+                          
+                          {/* Clear Sorting */}
+                          <button
+                            onClick={() => setSortConfig({ key: null, direction: 'asc' })}
+                            className="w-full px-4 py-3 text-left text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors duration-200"
+                          >
+                            Clear Sorting
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Current Sort Display */}
+                    {sortConfig.key && (
+                      <div className="flex items-center space-x-2 text-sm text-[#a0a0a0]">
+                        <span>Sorted by:</span>
+                        <span className="text-purple-400 font-medium capitalize">
+                          {sortConfig.key === 'username' ? 'User Name' : 
+                           sortConfig.key === 'subscription' ? 'Subscription Status' : 
+                           sortConfig.key}
+                        </span>
+                        <span className="text-purple-400">
+                          ({sortConfig.direction === 'asc' ? 'A-Z' : 'Z-A'})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
                
                <div className="flex items-center justify-between">
                  <div>
@@ -517,17 +694,65 @@ export default function AdminPanel() {
                    <div className="bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-[#4a4f5e]/30 shadow-xl">
                      <div className="overflow-x-auto">
                        <table className="w-full">
-                         <thead className="bg-gradient-to-r from-[#1a1f2e]/80 to-[#2a2f3e]/80">
-                           <tr>
-                             <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">User</th>
-                             <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">Email</th>
-                             <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">Subscription</th>
-                             <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">Status</th>
-                             <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">Actions</th>
-                           </tr>
-                         </thead>
-                         <tbody className="divide-y divide-[#4a4f5e]/20">
-                           {users.map((user, index) => (
+                                                    <thead className="bg-gradient-to-r from-[#1a1f2e]/80 to-[#2a2f3e]/80">
+                             <tr>
+                               <th 
+                                 className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
+                                 onClick={() => handleSort('username')}
+                               >
+                                 <div className="flex items-center space-x-2">
+                                   <span>User</span>
+                                   {sortConfig.key === 'username' && (
+                                     <span className="text-purple-400">
+                                       {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                     </span>
+                                   )}
+                                 </div>
+                               </th>
+                               <th 
+                                 className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
+                                 onClick={() => handleSort('email')}
+                               >
+                                 <div className="flex items-center space-x-2">
+                                   <span>Email</span>
+                                   {sortConfig.key === 'email' && (
+                                     <span className="text-purple-400">
+                                       {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                     </span>
+                                   )}
+                                 </div>
+                               </th>
+                               <th 
+                                 className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
+                                 onClick={() => handleSort('subscription')}
+                               >
+                                 <div className="flex items-center space-x-2">
+                                   <span>Subscription</span>
+                                   {sortConfig.key === 'subscription' && (
+                                     <span className="text-purple-400">
+                                       {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                     </span>
+                                   )}
+                                 </div>
+                               </th>
+                               <th 
+                                 className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
+                                 onClick={() => handleSort('status')}
+                               >
+                                 <div className="flex items-center space-x-2">
+                                   <span>Status</span>
+                                   {sortConfig.key === 'status' && (
+                                     <span className="text-purple-400">
+                                       {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                     </span>
+                                   )}
+                                 </div>
+                               </th>
+                               <th className="px-8 py-6 text-left text-sm font-semibold text-[#d0d0d0] uppercase tracking-wider">Actions</th>
+                             </tr>
+                           </thead>
+                                                    <tbody className="divide-y divide-[#4a4f5e]/20">
+                             {getSortedUsers().map((user, index) => (
                              <tr 
                                key={user.id} 
                                className="group hover:bg-[#3a3f4e]/50 transition-all duration-300 transform hover:scale-[1.01]"
@@ -599,7 +824,7 @@ export default function AdminPanel() {
                                      <EyeIcon className="w-5 h-5" />
                                    </button>
                                    <button
-                                     onClick={() => deleteUser(user.id)}
+                                     onClick={() => showDeleteConfirmation(user)}
                                      disabled={deleteLoading === user.id}
                                      className="p-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-300 transform hover:scale-110 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
                                      title="Delete User"
@@ -627,16 +852,24 @@ export default function AdminPanel() {
                        </div>
                        <p className="text-lg text-[#d0d0d0] mb-2">No users found</p>
                        <p className="text-sm text-[#808080]">No users match your search for "{searchQuery}"</p>
-                       <button
-                         onClick={() => {
-                           setSearchInput("");
-                           setSearchQuery("");
-                           setCurrentPage(1);
-                         }}
-                         className="mt-4 px-6 py-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 text-purple-300 rounded-lg transition-all duration-300 border border-purple-500/30"
-                       >
-                         Clear Search
-                       </button>
+                                               <div className="flex gap-3">
+                          <button
+                            onClick={() => {
+                              setSearchInput("");
+                              setSearchQuery("");
+                              setCurrentPage(1);
+                            }}
+                            className="px-6 py-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 text-purple-300 rounded-lg transition-all duration-300 border border-purple-500/30"
+                          >
+                            Clear Search
+                          </button>
+                          <button
+                            onClick={() => setSortConfig({ key: null, direction: 'asc' })}
+                            className="px-6 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-blue-300 rounded-lg transition-all duration-300 border border-blue-500/30"
+                          >
+                            Clear Sorting
+                          </button>
+                        </div>
                      </div>
                    )}
 
@@ -710,6 +943,20 @@ export default function AdminPanel() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={deleteUser}
+        title="Delete User"
+        message={`Are you sure you want to delete ${userToDelete?.first_name && userToDelete?.last_name 
+          ? `${userToDelete.first_name} ${userToDelete.last_name}` 
+          : userToDelete?.username || 'this user'}? This action cannot be undone.`}
+        confirmText="Delete User"
+        cancelText="Cancel"
+        isLoading={deleteLoading !== null}
+      />
 
       {/* User Detail Modal */}
       <UserDetailModal
