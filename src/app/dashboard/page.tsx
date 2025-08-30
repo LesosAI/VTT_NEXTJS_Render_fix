@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import Skeleton from 'react-loading-skeleton';
 import clsx from "clsx";
 import Tour from "@/components/Tour";
+import DashboardStats from "@/components/DashboardStats";
 
 interface Character {
   id: number;
@@ -49,6 +50,14 @@ interface Subscription {
   current_period_end: string;
 }
 
+interface DashboardStats {
+  total_users: number;
+  subscribed_users: number;
+  total_campaigns: number;
+  total_maps: number;
+  total_characters: number;
+}
+
 export default function Dashboard() {
   const { username } = useLogin();
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,8 +70,9 @@ export default function Dashboard() {
   const [hasGameMaster, setHasGameMaster] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const router = useRouter();
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,10 +115,12 @@ export default function Dashboard() {
     const fetchPermissions = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${username}/permissions`
         );
-        const data = await response.json();
-        setHasGameMaster(data.has_game_master);
+        if (response.ok) {
+          const data = await response.json();
+          setHasGameMaster(data.permissions.includes("Game Master"));
+        }
       } catch (error) {
         console.error("Failed to fetch permissions:", error);
       }
@@ -130,10 +142,38 @@ export default function Dashboard() {
       }
     };
 
+    const fetchDashboardStats = async () => {
+      try {
+        console.log("🔍 Fetching dashboard stats...");
+        // TODO: Move this to environment variable NEXT_PUBLIC_API_BASE_URL
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+        console.log("🌍 API Base URL:", apiBaseUrl);
+        // The backend requires admin email parameter for authentication
+        const url = `${apiBaseUrl}/admin/stats?email=${encodeURIComponent(username)}`;
+        console.log("🔗 Full URL:", url);
+        const response = await fetch(url);
+        console.log("📊 Dashboard stats response:", response);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📊 Dashboard stats data:", data);
+          setDashboardStats(data);
+        } else {
+          console.error("❌ Failed to fetch dashboard stats:", response.status);
+          const errorText = await response.text();
+          console.error("❌ Error response:", errorText);
+        }
+      } catch (error) {
+        console.error("💥 Error fetching dashboard stats:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
     if (username) {
       fetchData();
       fetchPermissions();
       fetchSubscription();
+      fetchDashboardStats();
     }
   }, [username]);
 
@@ -326,6 +366,14 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-12">
+            {/* Dashboard Statistics Cards */}
+            {!statsLoading && dashboardStats && (
+              <>
+                {console.log("🎯 Rendering DashboardStats with stats:", dashboardStats)}
+                <DashboardStats stats={dashboardStats} />
+              </>
+            )}
+            
             {loading ? (
               <>
                 {/* Skeleton Loader for Characters */}

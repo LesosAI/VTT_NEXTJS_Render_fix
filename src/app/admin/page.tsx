@@ -90,6 +90,129 @@ export default function AdminPanel() {
   // Sorting state
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
 
+  // Subsection state for dashboard cards
+  const [dashView, setDashView] = useState<'stats' | 'subscribed' | 'maps' | 'characters'>('stats');
+  const [dashLoading, setDashLoading] = useState(false);
+  const [dashSearch, setDashSearch] = useState("");
+  const [dashPage, setDashPage] = useState(1);
+  const [dashPagination, setDashPagination] = useState<Pagination | null>(null);
+  const [dashUsers, setDashUsers] = useState<User[]>([]);
+  interface MapItem { id: number; image_url: string; description: string; style: string; tone: string; created_at: string; user?: { username: string; email: string } | null }
+  interface CharacterItem { id: number; image_url: string; description: string; style: string; tags: string[]; created_at: string; user?: { username: string; email: string } | null }
+  const [dashMaps, setDashMaps] = useState<MapItem[]>([]);
+  const [dashCharacters, setDashCharacters] = useState<CharacterItem[]>([]);
+
+  const fetchDashData = async (type: 'subscribed' | 'maps' | 'characters', page: number = 1, search: string = "") => {
+    try {
+      setDashLoading(true);
+      setDashPage(page);
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const endpoint = type === 'subscribed' ? 'subscribed-users' : type;
+      const url = `${base}/admin/dashboard/${endpoint}?page=${page}&per_page=${type==='subscribed'?10:12}${search?`&search=${encodeURIComponent(search)}`:""}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error('Dashboard subfetch failed', res.status);
+        setDashPagination(null);
+        if (type==='subscribed') setDashUsers([]);
+        if (type==='maps') setDashMaps([]);
+        if (type==='characters') setDashCharacters([]);
+        return;
+      }
+      const data = await res.json();
+      setDashPagination(data.pagination || null);
+      if (type==='subscribed') setDashUsers(data.users || []);
+      if (type==='maps') setDashMaps(data.maps || []);
+      if (type==='characters') setDashCharacters(data.characters || []);
+    } catch (e) {
+      console.error('Dashboard subfetch error', e);
+    } finally {
+      setDashLoading(false);
+    }
+  };
+
+  const renderDashSubsection = () => {
+    if (dashView === 'stats') return null;
+
+    return (
+      <div className="mt-8 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h3 className="text-xl font-semibold text-[#e0e0e0]">
+              {dashView === 'subscribed' ? 'Subscribed Users' : dashView === 'maps' ? 'All Maps' : 'All Characters'}
+            </h3>
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={dashSearch}
+              onChange={(e)=>setDashSearch(e.target.value)}
+              placeholder={`Search ${dashView}...`}
+              className="px-3 py-2 bg-[#2a2f3e] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button onClick={()=>fetchDashData(dashView as any, 1, dashSearch)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">Search</button>
+          </div>
+        </div>
+
+        {dashLoading ? (
+          <div className="text-center py-8 text-[#a0a0a0]">Loading...</div>
+        ) : dashView === 'subscribed' ? (
+          <div className="space-y-3">
+            {dashUsers.map(u=> (
+              <div key={u.id} className="bg-[#2a2f3e] rounded-lg p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-white font-medium">{u.first_name || ''} {u.last_name || ''}</div>
+                  <div className="text-sm text-[#a0a0a0]">{u.email}</div>
+                  <div className="text-xs text-[#808080]">@{u.username}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-[#a0a0a0]">{u.subscription?.plan_name || 'Unknown'}</div>
+                  <div className="text-xs text-[#808080]">{u.subscription?.status || ''}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : dashView === 'maps' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dashMaps.map(m => (
+              <div key={m.id} className="bg-[#2a2f3e] rounded-lg overflow-hidden">
+                <img src={m.image_url} alt={m.description} className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <div className="text-white font-medium mb-1">{m.description}</div>
+                  <div className="text-xs text-[#a0a0a0]">{m.style} {m.tone?`• ${m.tone}`:''}</div>
+                  <div className="text-xs text-[#808080] mt-1">{new Date(m.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dashCharacters.map(c => (
+              <div key={c.id} className="bg-[#2a2f3e] rounded-lg overflow-hidden">
+                <img src={c.image_url} alt={c.description} className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <div className="text-white font-medium mb-1">{c.description}</div>
+                  <div className="flex flex-wrap gap-1">
+                    {c.tags?.map((t, i)=> (
+                      <span key={i} className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">{t}</span>
+                    ))}
+                  </div>
+                  <div className="text-xs text-[#808080] mt-1">{new Date(c.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {dashPagination && (
+          <div className="flex items-center justify-between">
+            <button disabled={!dashPagination.has_prev} onClick={()=>fetchDashData(dashView as any, dashPage-1, dashSearch)} className="px-3 py-2 bg-[#2a2f3e] rounded-lg disabled:opacity-50">Prev</button>
+            <div className="text-sm text-[#a0a0a0]">Page {dashPagination.page} of {dashPagination.pages}</div>
+            <button disabled={!dashPagination.has_next} onClick={()=>fetchDashData(dashView as any, dashPage+1, dashSearch)} className="px-3 py-2 bg-[#2a2f3e] rounded-lg disabled:opacity-50">Next</button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Check admin authentication - hardcoded approach
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -140,7 +263,7 @@ export default function AdminPanel() {
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/dashboard/stats?email=${encodeURIComponent(username)}`;
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/stats?email=${encodeURIComponent(username)}`;
       console.log("📊 Fetching stats from URL:", url);
       console.log("📧 Username being sent:", username);
       
@@ -150,11 +273,25 @@ export default function AdminPanel() {
       const data = await response.json();
       console.log("📦 Stats response data:", data);
       
-      if (data.success) {
-        setStats(data.stats);
+      // Accept both legacy { success, stats } and new raw stats shape
+      let resolvedStats: DashboardStats | null = null;
+      if (data && typeof data === 'object') {
+        if ('success' in data && data.success && 'stats' in data) {
+          resolvedStats = (data as any).stats as DashboardStats;
+        } else if ('total_users' in data && 'subscribed_users' in data && 'total_campaigns' in data && 'total_maps' in data && 'total_characters' in data) {
+          resolvedStats = data as DashboardStats;
+        }
+      }
+
+      if (resolvedStats) {
+        setStats(resolvedStats);
+      } else {
+        console.error('❌ Unexpected stats response shape');
+        setStats(null);
       }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+      setStats(null);
     } finally {
       setStatsLoading(false);
     }
@@ -457,62 +594,76 @@ export default function AdminPanel() {
                    ))}
                  </div>
                ) : stats ? (
+                 <>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                   <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10">
-                     <div className="flex items-center justify-between mb-4">
-                       <div className="p-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30 group-hover:scale-110 transition-transform duration-300">
-                         <UsersIcon className="w-6 h-6 text-blue-400" />
-                       </div>
-                       <div className="text-2xl text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
-                     </div>
-                     <div className="text-4xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors duration-300">{stats.total_users}</div>
-                     <div className="text-[#a0a0a0] text-sm font-medium">Total Users</div>
-                   </div>
-                   
-                   <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-green-500/10">
-                     <div className="flex items-center justify-between mb-4">
-                       <div className="p-3 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl border border-green-500/30 group-hover:scale-110 transition-transform duration-300">
-                         <CreditCardIcon className="w-6 h-6 text-green-400" />
-                       </div>
-                       <div className="text-2xl text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
-                     </div>
-                     <div className="text-4xl font-bold text-white mb-2 group-hover:text-green-200 transition-colors duration-300">{stats.subscribed_users}</div>
-                     <div className="text-[#a0a0a0] text-sm font-medium">Subscribed Users</div>
-                   </div>
-                   
-                   <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10">
-                     <div className="flex items-center justify-between mb-4">
-                       <div className="p-3 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl border border-purple-500/30 group-hover:scale-110 transition-transform duration-300">
-                         <DocumentTextIcon className="w-6 h-6 text-purple-400" />
-                       </div>
-                       <div className="text-2xl text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
-                     </div>
-                     <div className="text-4xl font-bold text-white mb-2 group-hover:text-purple-200 transition-colors duration-300">{stats.total_campaigns}</div>
-                     <div className="text-[#a0a0a0] text-sm font-medium">Campaigns Created</div>
-                   </div>
-                   
-                   <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/10">
-                     <div className="flex items-center justify-between mb-4">
-                       <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-xl border border-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
-                         <MapIcon className="w-6 h-6 text-yellow-400" />
-                       </div>
-                       <div className="text-2xl text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
-                     </div>
-                     <div className="text-4xl font-bold text-white mb-2 group-hover:text-yellow-200 transition-colors duration-300">{stats.total_maps}</div>
-                     <div className="text-[#a0a0a0] text-sm font-medium">Maps Created</div>
-                   </div>
-                   
-                   <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/10">
-                     <div className="flex items-center justify-between mb-4">
-                       <div className="p-3 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 rounded-xl border border-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
-                         <UserGroupIcon className="w-6 h-6 text-indigo-400" />
-                       </div>
-                       <div className="text-2xl text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
-                     </div>
-                     <div className="text-4xl font-bold text-white mb-2 group-hover:text-indigo-200 transition-colors duration-300">{stats.total_characters}</div>
-                     <div className="text-[#a0a0a0] text-sm font-medium">Characters Created</div>
-                   </div>
-                 </div>
+                    {/* Total Users -> go to Users tab */}
+                    <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer"
+                         onClick={() => setActiveSection('users')}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                          <UsersIcon className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="text-2xl text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
+                      </div>
+                      <div className="text-4xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors duration-300">{stats.total_users}</div>
+                      <div className="text-[#a0a0a0] text-sm font-medium">Total Users</div>
+                    </div>
+                    
+                    {/* Subscribed Users -> inline list */}
+                    <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-green-500/10 cursor-pointer"
+                         onClick={() => { setDashView('subscribed'); fetchDashData('subscribed', 1, ''); }}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl border border-green-500/30 group-hover:scale-110 transition-transform duration-300">
+                          <CreditCardIcon className="w-6 h-6 text-green-400" />
+                        </div>
+                        <div className="text-2xl text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
+                      </div>
+                      <div className="text-4xl font-bold text-white mb-2 group-hover:text-green-200 transition-colors duration-300">{stats.subscribed_users}</div>
+                      <div className="text-[#a0a0a0] text-sm font-medium">Subscribed Users</div>
+                    </div>
+                    
+                    {/* Campaigns (navigate to users tab for management) */}
+                    <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 cursor-pointer"
+                         onClick={() => setActiveSection('users')}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl border border-purple-500/30 group-hover:scale-110 transition-transform duration-300">
+                          <DocumentTextIcon className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div className="text-2xl text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
+                      </div>
+                      <div className="text-4xl font-bold text-white mb-2 group-hover:text-purple-200 transition-colors duration-300">{stats.total_campaigns}</div>
+                      <div className="text-[#a0a0a0] text-sm font-medium">Campaigns Created</div>
+                    </div>
+                    
+                    {/* Maps -> inline grid */}
+                    <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/10 cursor-pointer"
+                         onClick={() => { setDashView('maps'); fetchDashData('maps', 1, ''); }}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-xl border border-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
+                          <MapIcon className="w-6 h-6 text-yellow-400" />
+                        </div>
+                        <div className="text-2xl text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
+                      </div>
+                      <div className="text-4xl font-bold text-white mb-2 group-hover:text-yellow-200 transition-colors duration-300">{stats.total_maps}</div>
+                      <div className="text-[#a0a0a0] text-sm font-medium">Maps Created</div>
+                    </div>
+                    
+                    {/* Characters -> inline grid */}
+                    <div className="group bg-gradient-to-br from-[#2a2f3e]/80 to-[#3a3f4e]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#4a4f5e]/30 hover:border-[#5a5f6e]/50 transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer"
+                         onClick={() => { setDashView('characters'); fetchDashData('characters', 1, ''); }}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 rounded-xl border border-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
+                          <UserGroupIcon className="w-6 h-6 text-indigo-400" />
+                        </div>
+                        <div className="text-2xl text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</div>
+                      </div>
+                      <div className="text-4xl font-bold text-white mb-2 group-hover:text-indigo-200 transition-colors duration-300">{stats.total_characters}</div>
+                      <div className="text-[#a0a0a0] text-sm font-medium">Characters Created</div>
+                    </div>
+                  </div>
+                  {renderDashSubsection()}
+                  </>
+
                ) : (
                  <div className="text-center text-[#a0a0a0] py-12 bg-[#2a2f3e]/40 rounded-2xl border border-[#4a4f5e]/20">
                    <div className="w-16 h-16 mx-auto mb-4 bg-[#3a3f4e] rounded-full flex items-center justify-center">
