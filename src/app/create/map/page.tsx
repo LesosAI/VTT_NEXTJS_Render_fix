@@ -35,20 +35,6 @@ export default function CreateMap() {
   // Check subscription access
   const { subscription, loading: subscriptionLoading, hasAccess } = useSubscriptionCheck();
 
-  // Show loading while checking subscription
-  if (subscriptionLoading) {
-    return (
-      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
-        <ModernLoader />
-      </div>
-    );
-  }
-
-  // Redirect if no access (this will happen automatically via the hook)
-  if (!hasAccess) {
-    return null;
-  }
-
   const fetchMapHistory = async () => {
     try {
       const response = await fetch(
@@ -70,6 +56,20 @@ export default function CreateMap() {
       fetchMapHistory();
     }
   }, [username]);
+
+  // Show loading while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
+        <ModernLoader />
+      </div>
+    );
+  }
+
+  // Redirect if no access (this will happen automatically via the hook)
+  if (!hasAccess) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

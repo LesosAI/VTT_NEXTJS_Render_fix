@@ -56,6 +56,20 @@ export async function middleware(request: NextRequest) {
 
   // Check permissions for Game Master features
   if (gameMasterPages.includes(path)) {
+    // Admin bypass for Game Master pages
+    try {
+      if (isLoggedIn && username) {
+        const adminRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/check-auth?email=${encodeURIComponent(username)}`)
+        const adminData = await adminRes.json()
+        if (adminData?.authenticated && adminData?.admin) {
+          console.log('👑 Admin bypass: granting access to Game Master page')
+          return NextResponse.next()
+        }
+      }
+    } catch (error) {
+      console.warn('Admin check failed in middleware, falling back to subscription check:', error)
+    }
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`)
       const data = await response.json()

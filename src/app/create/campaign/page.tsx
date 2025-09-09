@@ -33,20 +33,6 @@ export default function CreateCampaign() {
 
   const [generatedText, setGeneratedText] = useState("");
 
-  // Show loading while checking subscription
-  if (subscriptionLoading) {
-    return (
-      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
-        <ModernLoader />
-      </div>
-    );
-  }
-
-  // Redirect if no access (this will happen automatically via the hook)
-  if (!hasAccess) {
-    return null;
-  }
-
   useEffect(() => {
     const fetchCampaigns = async () => {
       setIsLoading(true);
@@ -69,6 +55,20 @@ export default function CreateCampaign() {
       fetchCampaigns();
     }
   }, [username]);
+
+  // Show loading while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen bg-[#0e1826] flex items-center justify-center">
+        <ModernLoader />
+      </div>
+    );
+  }
+
+  // Redirect if no access (this will happen automatically via the hook)
+  if (!hasAccess) {
+    return null;
+  }
 
   // Add function to fetch content items
 

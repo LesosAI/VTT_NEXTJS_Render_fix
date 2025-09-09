@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import Skeleton from 'react-loading-skeleton';
 import clsx from "clsx";
 import Tour from "@/components/Tour";
-import DashboardStats from "@/components/DashboardStats";
 
 interface Character {
   id: number;
@@ -50,13 +49,7 @@ interface Subscription {
   current_period_end: string;
 }
 
-interface DashboardStats {
-  total_users: number;
-  subscribed_users: number;
-  total_campaigns: number;
-  total_maps: number;
-  total_characters: number;
-}
+ 
 
 export default function Dashboard() {
   const { username } = useLogin();
@@ -68,10 +61,9 @@ export default function Dashboard() {
   const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGameMaster, setHasGameMaster] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -126,6 +118,18 @@ export default function Dashboard() {
       }
     };
 
+    const fetchAdmin = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/check-auth?email=${encodeURIComponent(String(username))}`);
+        if (res.ok) {
+          const data = await res.json();
+          setIsAdmin(Boolean(data?.authenticated && data?.admin));
+        }
+      } catch (e) {
+        console.warn('Failed to check admin status:', e);
+      }
+    };
+
     const fetchSubscription = async () => {
       try {
         const response = await fetch(
@@ -142,38 +146,11 @@ export default function Dashboard() {
       }
     };
 
-    const fetchDashboardStats = async () => {
-      try {
-        console.log("🔍 Fetching dashboard stats...");
-        // TODO: Move this to environment variable NEXT_PUBLIC_API_BASE_URL
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-        console.log("🌍 API Base URL:", apiBaseUrl);
-        // The backend requires admin email parameter for authentication
-        const url = `${apiBaseUrl}/admin/stats?email=${encodeURIComponent(username)}`;
-        console.log("🔗 Full URL:", url);
-        const response = await fetch(url);
-        console.log("📊 Dashboard stats response:", response);
-        if (response.ok) {
-          const data = await response.json();
-          console.log("📊 Dashboard stats data:", data);
-          setDashboardStats(data);
-        } else {
-          console.error("❌ Failed to fetch dashboard stats:", response.status);
-          const errorText = await response.text();
-          console.error("❌ Error response:", errorText);
-        }
-      } catch (error) {
-        console.error("💥 Error fetching dashboard stats:", error);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-
     if (username) {
       fetchData();
       fetchPermissions();
       fetchSubscription();
-      fetchDashboardStats();
+      fetchAdmin();
     }
   }, [username]);
 
@@ -329,7 +306,7 @@ export default function Dashboard() {
                   >
                     Create Character
                   </Link>
-                  {hasGameMaster ? (
+                  {hasGameMaster || isAdmin ? (
                     <>
                       <Link
                         href="/create/map"
@@ -366,14 +343,6 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-12">
-            {/* Dashboard Statistics Cards */}
-            {!statsLoading && dashboardStats && (
-              <>
-                {console.log("🎯 Rendering DashboardStats with stats:", dashboardStats)}
-                <DashboardStats stats={dashboardStats} />
-              </>
-            )}
-            
             {loading ? (
               <>
                 {/* Skeleton Loader for Characters */}
