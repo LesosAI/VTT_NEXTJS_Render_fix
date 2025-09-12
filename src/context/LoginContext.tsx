@@ -79,9 +79,24 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
     setIsLoggedIn(false);
     setUsername("");
     setIsSubaccount(false);
+    
+    // Clear cookies
     Cookies.remove("isLoggedIn");
     Cookies.remove("username");
     Cookies.remove("isSubaccount");
+    
+    // Clear localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("username");
+      localStorage.removeItem("isSubaccount");
+    }
+    
+    // Clear cookies by setting them to expire (fallback method)
+    document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "isSubaccount=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    
     router.push("/register");
   };
 

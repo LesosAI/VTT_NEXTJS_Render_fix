@@ -49,6 +49,8 @@ interface Subscription {
   current_period_end: string;
 }
 
+ 
+
 export default function Dashboard() {
   const { username } = useLogin();
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,10 +61,10 @@ export default function Dashboard() {
   const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGameMaster, setHasGameMaster] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const router = useRouter();
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,12 +107,26 @@ export default function Dashboard() {
     const fetchPermissions = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/check-permissions?username=${username}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${username}/permissions`
         );
-        const data = await response.json();
-        setHasGameMaster(data.has_game_master);
+        if (response.ok) {
+          const data = await response.json();
+          setHasGameMaster(data.permissions.includes("Game Master"));
+        }
       } catch (error) {
         console.error("Failed to fetch permissions:", error);
+      }
+    };
+
+    const fetchAdmin = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/check-auth?email=${encodeURIComponent(String(username))}`);
+        if (res.ok) {
+          const data = await res.json();
+          setIsAdmin(Boolean(data?.authenticated && data?.admin));
+        }
+      } catch (e) {
+        console.warn('Failed to check admin status:', e);
       }
     };
 
@@ -134,6 +150,7 @@ export default function Dashboard() {
       fetchData();
       fetchPermissions();
       fetchSubscription();
+      fetchAdmin();
     }
   }, [username]);
 
@@ -289,7 +306,7 @@ export default function Dashboard() {
                   >
                     Create Character
                   </Link>
-                  {hasGameMaster ? (
+                  {hasGameMaster || isAdmin ? (
                     <>
                       <Link
                         href="/create/map"
