@@ -566,6 +566,12 @@ export default function AdminPanel() {
                   </div>
                 </button>
                 <button
+                  onClick={() => router.push('/dashboard')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-blue-300 rounded-xl transition-all duration-300 transform hover:scale-105 border border-blue-500/30"
+                >
+                  User Dashboard
+                </button>
+                <button
                   onClick={handleLogout}
                   className="px-6 py-3 bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 text-red-300 rounded-xl transition-all duration-300 transform hover:scale-105 border border-red-500/30 flex items-center gap-2"
                 >
